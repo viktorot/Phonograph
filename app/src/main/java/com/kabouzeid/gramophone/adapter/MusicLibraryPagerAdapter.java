@@ -82,6 +82,7 @@ public class MusicLibraryPagerAdapter extends FragmentPagerAdapter {
         return MusicFragments.of(getFragment(position).getClass()).ordinal();
     }
 
+
     @NonNull
     @Override
     public Object instantiateItem(@NonNull final ViewGroup container, final int position) {
