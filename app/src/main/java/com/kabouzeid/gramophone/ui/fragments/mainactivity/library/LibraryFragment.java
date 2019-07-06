@@ -43,6 +43,7 @@ import com.kabouzeid.gramophone.ui.fragments.mainactivity.library.pager.SongsFra
 import com.kabouzeid.gramophone.util.PhonographColorUtil;
 import com.kabouzeid.gramophone.util.PreferenceUtil;
 import com.kabouzeid.gramophone.util.Util;
+import com.kabouzeid.gramophone.x.songs.SongsFragmentX;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -66,7 +67,7 @@ public class LibraryFragment extends AbsMainActivityFragment implements CabHolde
 
     public static LibraryFragment newInstance() {
         return new LibraryFragment();
-    }
+}
 
     public LibraryFragment() {
     }
@@ -196,12 +197,30 @@ public class LibraryFragment extends AbsMainActivityFragment implements CabHolde
             if (Util.isLandscape(getResources())) {
                 gridSizeItem.setTitle(R.string.action_grid_size_land);
             }
-            setUpGridSizeMenu(absLibraryRecyclerViewCustomGridSizeFragment, gridSizeItem.getSubMenu());
+            setUpGridSizeMenu(absLibraryRecyclerViewCustomGridSizeFragment.getGridSize(),
+                    absLibraryRecyclerViewCustomGridSizeFragment.getMaxGridSize(),
+                    gridSizeItem.getSubMenu());
 
             menu.findItem(R.id.action_colored_footers).setChecked(absLibraryRecyclerViewCustomGridSizeFragment.usePalette());
             menu.findItem(R.id.action_colored_footers).setEnabled(absLibraryRecyclerViewCustomGridSizeFragment.canUsePalette());
 
             setUpSortOrderMenu(absLibraryRecyclerViewCustomGridSizeFragment, menu.findItem(R.id.action_sort_order).getSubMenu());
+        } else if (currentFragment instanceof SongsFragmentX && currentFragment.isAdded()) {
+            SongsFragmentX absLibraryRecyclerViewCustomGridSizeFragment = (SongsFragmentX) currentFragment;
+
+            MenuItem gridSizeItem = menu.findItem(R.id.action_grid_size);
+            if (Util.isLandscape(getResources())) {
+                gridSizeItem.setTitle(R.string.action_grid_size_land);
+            }
+            setUpGridSizeMenu(absLibraryRecyclerViewCustomGridSizeFragment.getGridSize(),
+                    absLibraryRecyclerViewCustomGridSizeFragment.getMaxGridSize(),
+                    gridSizeItem.getSubMenu());
+
+            menu.findItem(R.id.action_colored_footers).setChecked(absLibraryRecyclerViewCustomGridSizeFragment.usePalette());
+            menu.findItem(R.id.action_colored_footers).setEnabled(absLibraryRecyclerViewCustomGridSizeFragment.canUsePalette());
+
+            // TODO
+            //setUpSortOrderMenu(absLibraryRecyclerViewCustomGridSizeFragment, menu.findItem(R.id.action_sort_order).getSubMenu());
         } else {
             menu.removeItem(R.id.action_grid_size);
             menu.removeItem(R.id.action_colored_footers);
@@ -254,8 +273,8 @@ public class LibraryFragment extends AbsMainActivityFragment implements CabHolde
         return super.onOptionsItemSelected(item);
     }
 
-    private void setUpGridSizeMenu(@NonNull AbsLibraryPagerRecyclerViewCustomGridSizeFragment fragment, @NonNull SubMenu gridSizeMenu) {
-        switch (fragment.getGridSize()) {
+    private void setUpGridSizeMenu(int gridSize, int maxGridSize, @NonNull SubMenu gridSizeMenu) {
+        switch (gridSize) {
             case 1:
                 gridSizeMenu.findItem(R.id.action_grid_size_1).setChecked(true);
                 break;
@@ -281,7 +300,7 @@ public class LibraryFragment extends AbsMainActivityFragment implements CabHolde
                 gridSizeMenu.findItem(R.id.action_grid_size_8).setChecked(true);
                 break;
         }
-        int maxGridSize = fragment.getMaxGridSize();
+
         if (maxGridSize < 8) {
             gridSizeMenu.findItem(R.id.action_grid_size_8).setVisible(false);
         }

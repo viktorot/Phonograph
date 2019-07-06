@@ -1,7 +1,9 @@
 package com.kabouzeid.gramophone.ui.fragments.mainactivity.library.pager
 
+import android.app.Application
 import android.content.Context
 import android.os.Bundle
+import androidx.lifecycle.*
 import androidx.loader.app.LoaderManager
 import androidx.loader.content.Loader
 import androidx.recyclerview.widget.GridLayoutManager
@@ -13,15 +15,38 @@ import com.kabouzeid.gramophone.interfaces.LoaderIds
 import com.kabouzeid.gramophone.loader.SongLoader
 import com.kabouzeid.gramophone.misc.WrappedAsyncTaskLoader
 import com.kabouzeid.gramophone.model.Song
+import com.kabouzeid.gramophone.repo.SongRepo
 import com.kabouzeid.gramophone.util.PreferenceUtil
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 import java.util.ArrayList
 
 /**
  * @author Karim Abou Zeid (kabouzeid)
  */
+
+class SongsViewModel(app: Application) : AndroidViewModel(app) {
+
+    private val _songs: MutableLiveData<List<Song>> = MutableLiveData()
+    val songs: LiveData<List<Song>> = _songs
+
+    fun inti() {
+        viewModelScope.launch {
+            delay(5000)
+            val songs = SongRepo.getSongs(getApplication())
+            _songs.value = songs.toList()
+        }
+    }
+
+}
+
 class SongsFragment : AbsLibraryPagerRecyclerViewCustomGridSizeFragment<SongAdapter, GridLayoutManager>()
         , LoaderManager.LoaderCallbacks<ArrayList<Song>> {
+
+    private lateinit var vm: SongsViewModel
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -107,26 +132,32 @@ class SongsFragment : AbsLibraryPagerRecyclerViewCustomGridSizeFragment<SongAdap
     }
 
     override fun onCreateLoader(id: Int, args: Bundle?): Loader<ArrayList<Song>> {
+//        vm = ViewModelProviders.of(this).get(SongsViewModel::class.java)
+//        vm.songs.observe(this, Observer { data ->
+//            adapter.swapDataSet(ArrayList(data))
+//        })
+//
+//        vm.inti()
         return AsyncSongLoader(requireContext())
     }
 
-    override fun onLoadFinished(loader: Loader<ArrayList<Song>>, data: ArrayList<Song>) {
+    override fun onLoadFinished(loader: Loader<ArrayList<Song>?>, data: ArrayList<Song>?) {
         adapter.swapDataSet(data)
     }
 
-    override fun onLoaderReset(loader: Loader<ArrayList<Song>>) {
+    override fun onLoaderReset(loader: Loader<ArrayList<Song>?>) {
         adapter.swapDataSet(ArrayList())
-    }
-
-    private class AsyncSongLoader(context: Context) : WrappedAsyncTaskLoader<ArrayList<Song>>(context) {
-
-        override fun loadInBackground(): ArrayList<Song>? {
-            return SongLoader.getAllSongs(context)
-        }
     }
 
     companion object {
 
         private val LOADER_ID = LoaderIds.SONGS_FRAGMENT
+    }
+}
+
+class AsyncSongLoader(context: Context) : WrappedAsyncTaskLoader<ArrayList<Song>>(context) {
+
+    override fun loadInBackground(): ArrayList<Song>? {
+        return SongLoader.getAllSongs(context)
     }
 }

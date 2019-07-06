@@ -14,7 +14,7 @@ import com.kabouzeid.gramophone.ui.fragments.mainactivity.library.pager.AlbumsFr
 import com.kabouzeid.gramophone.ui.fragments.mainactivity.library.pager.ArtistsFragment;
 import com.kabouzeid.gramophone.ui.fragments.mainactivity.library.pager.GenresFragment;
 import com.kabouzeid.gramophone.ui.fragments.mainactivity.library.pager.PlaylistsFragment;
-import com.kabouzeid.gramophone.ui.fragments.mainactivity.library.pager.SongsFragment;
+import com.kabouzeid.gramophone.x.songs.SongsFragmentX;
 import com.kabouzeid.gramophone.util.PreferenceUtil;
 
 import java.lang.ref.WeakReference;
@@ -148,7 +148,8 @@ public class MusicLibraryPagerAdapter extends FragmentPagerAdapter {
     }
 
     public enum MusicFragments {
-        SONGS(SongsFragment.class),
+        //SONGS(SongsFragment.class),
+        SONGS(SongsFragmentX.class),
         ALBUMS(AlbumsFragment.class),
         ARTISTS(ArtistsFragment.class),
         GENRES(GenresFragment.class),
