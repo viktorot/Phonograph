@@ -1,6 +1,7 @@
 package com.kabouzeid.gramophone;
 
 import android.app.Application;
+import android.content.Context;
 import android.os.Build;
 import androidx.annotation.NonNull;
 
@@ -8,6 +9,7 @@ import com.anjlab.android.iab.v3.BillingProcessor;
 import com.anjlab.android.iab.v3.TransactionDetails;
 import com.kabouzeid.appthemehelper.ThemeStore;
 import com.kabouzeid.gramophone.appshortcuts.DynamicShortcutManager;
+import com.kabouzeid.gramophone.x.theming.ItemSizeManager;
 
 
 /**
@@ -20,12 +22,20 @@ public class App extends Application {
 
     private static App app;
 
+    public static App get(Context context) {
+        return (App )context.getApplicationContext();
+    }
+
     private BillingProcessor billingProcessor;
+
+    public ItemSizeManager sizeManager;
 
     @Override
     public void onCreate() {
         super.onCreate();
         app = this;
+
+        sizeManager = new ItemSizeManager(getApplicationContext());
 
         // default theme
         if (!ThemeStore.isConfigured(this, 1)) {

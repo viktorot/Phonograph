@@ -25,6 +25,7 @@ import com.kabouzeid.appthemehelper.ThemeStore;
 import com.kabouzeid.appthemehelper.common.ATHToolbarActivity;
 import com.kabouzeid.appthemehelper.util.TabLayoutUtil;
 import com.kabouzeid.appthemehelper.util.ToolbarContentTintHelper;
+import com.kabouzeid.gramophone.App;
 import com.kabouzeid.gramophone.R;
 import com.kabouzeid.gramophone.adapter.MusicLibraryPagerAdapter;
 import com.kabouzeid.gramophone.dialogs.CreatePlaylistDialog;
@@ -256,6 +257,19 @@ public class LibraryFragment extends AbsMainActivityFragment implements CabHolde
             if (handleSortOrderMenuItem(absLibraryRecyclerViewCustomGridSizeFragment, item)) {
                 return true;
             }
+        } else if (currentFragment instanceof SongsFragmentX) {
+//            SongsFragmentX absLibraryRecyclerViewCustomGridSizeFragment = (SongsFragmentX) currentFragment;
+//            if (item.getItemId() == R.id.action_colored_footers) {
+//                item.setChecked(!item.isChecked());
+//                absLibraryRecyclerViewCustomGridSizeFragment.setAndSaveUsePalette(item.isChecked());
+//                return true;
+//            }
+            if (handleGridSizeMenuItem( item)) {
+                return true;
+            }
+//            if (handleSortOrderMenuItem(absLibraryRecyclerViewCustomGridSizeFragment, item)) {
+//                return true;
+//            }
         }
 
         int id = item.getItemId();
@@ -353,6 +367,46 @@ public class LibraryFragment extends AbsMainActivityFragment implements CabHolde
             item.setChecked(true);
             fragment.setAndSaveGridSize(gridSize);
             toolbar.getMenu().findItem(R.id.action_colored_footers).setEnabled(fragment.canUsePalette());
+            return true;
+        }
+        return false;
+    }
+
+    private boolean handleGridSizeMenuItem(@NonNull MenuItem item) {
+        int gridSize = 0;
+        switch (item.getItemId()) {
+            case R.id.action_grid_size_1:
+                gridSize = 1;
+                break;
+            case R.id.action_grid_size_2:
+                gridSize = 2;
+                break;
+            case R.id.action_grid_size_3:
+                gridSize = 3;
+                break;
+            case R.id.action_grid_size_4:
+                gridSize = 4;
+                break;
+            case R.id.action_grid_size_5:
+                gridSize = 5;
+                break;
+            case R.id.action_grid_size_6:
+                gridSize = 6;
+                break;
+            case R.id.action_grid_size_7:
+                gridSize = 7;
+                break;
+            case R.id.action_grid_size_8:
+                gridSize = 8;
+                break;
+        }
+        if (gridSize > 0) {
+            item.setChecked(true);
+//            fragment.setAndSaveGridSize(gridSize);
+
+            App.get(requireContext()).sizeManager.set(gridSize, Util.isLandscape(getResources()));
+
+//            toolbar.getMenu().findItem(R.id.action_colored_footers).setEnabled(fragment.canUsePalette());
             return true;
         }
         return false;

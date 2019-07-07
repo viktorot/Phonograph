@@ -2,11 +2,13 @@ package com.kabouzeid.gramophone.x.songs
 
 import android.app.Application
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.*
+import com.kabouzeid.gramophone.App
 import com.kabouzeid.gramophone.R
 import com.kabouzeid.gramophone.model.Song
 import com.kabouzeid.gramophone.repo.SongRepo
@@ -36,6 +38,12 @@ class SongsFragmentX : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         vm = ViewModelProviders.of(this).get(SongsViewModelX::class.java)
+
+        vm.songs.observe(this, Observer(listView::onDataChanged))
+
+        App.get(requireContext()).sizeManager.size.observe(this, Observer { size ->
+            Log.d("---", "new size => ${size}")
+        })
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -44,8 +52,6 @@ class SongsFragmentX : Fragment() {
         (view as ViewGroup).run {
             this.addView(listView.inflate(inflater, this))
         }
-
-        vm.songs.observe(this, Observer(listView::onDataChanged))
 
         vm.load()
 
