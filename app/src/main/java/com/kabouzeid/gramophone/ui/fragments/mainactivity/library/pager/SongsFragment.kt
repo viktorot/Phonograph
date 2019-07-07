@@ -28,25 +28,8 @@ import java.util.ArrayList
  * @author Karim Abou Zeid (kabouzeid)
  */
 
-class SongsViewModel(app: Application) : AndroidViewModel(app) {
-
-    private val _songs: MutableLiveData<List<Song>> = MutableLiveData()
-    val songs: LiveData<List<Song>> = _songs
-
-    fun inti() {
-        viewModelScope.launch {
-            delay(5000)
-            val songs = SongRepo.getSongs(getApplication())
-            _songs.value = songs.toList()
-        }
-    }
-
-}
-
 class SongsFragment : AbsLibraryPagerRecyclerViewCustomGridSizeFragment<SongAdapter, GridLayoutManager>()
         , LoaderManager.LoaderCallbacks<ArrayList<Song>> {
-
-    private lateinit var vm: SongsViewModel
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -132,12 +115,6 @@ class SongsFragment : AbsLibraryPagerRecyclerViewCustomGridSizeFragment<SongAdap
     }
 
     override fun onCreateLoader(id: Int, args: Bundle?): Loader<ArrayList<Song>> {
-//        vm = ViewModelProviders.of(this).get(SongsViewModel::class.java)
-//        vm.songs.observe(this, Observer { data ->
-//            adapter.swapDataSet(ArrayList(data))
-//        })
-//
-//        vm.inti()
         return AsyncSongLoader(requireContext())
     }
 
