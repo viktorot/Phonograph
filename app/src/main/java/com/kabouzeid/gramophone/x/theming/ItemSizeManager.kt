@@ -4,18 +4,23 @@ import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.kabouzeid.gramophone.util.PreferenceUtil
+import java.lang.IllegalStateException
 
 class ItemSizeManager(private val context: Context) {
 
     private val _size = MutableLiveData<Int>()
     val size: LiveData<Int> = _size
 
-    init {
-        get()
-    }
+    private var isLandscape = false
 
-    fun get(landscape: Boolean = false) {
-        val storedSize = when (landscape) {
+    private var inited: Boolean = false
+
+    fun init(landscape: Boolean) {
+        inited = true
+
+        isLandscape = landscape
+
+        val storedSize = when (isLandscape) {
             true -> PreferenceUtil.getInstance(context).getSongGridSizeLand(context)
             false -> PreferenceUtil.getInstance(context).getSongGridSize(context)
         }
@@ -23,21 +28,37 @@ class ItemSizeManager(private val context: Context) {
         _size.value = storedSize
     }
 
-    fun set(value: Int, landscape: Boolean = false) {
+    fun get(): Int {
+        verifyInitialized()
+
+        return _size.value!!
+    }
+
+    fun set(value: Int) {
+        verifyInitialized()
+
         val old = _size.value
         if (old == value) {
             return
         }
 
-        store(value, landscape)
+        store(value)
 
         _size.value = value
     }
 
-    private fun store(value: Int, landscape: Boolean) {
-        when (landscape) {
+    private fun store(value: Int) {
+        verifyInitialized()
+
+        when (isLandscape) {
             true -> PreferenceUtil.getInstance(context).setSongGridSizeLand(value)
             false -> PreferenceUtil.getInstance(context).setSongGridSize(value)
+        }
+    }
+
+    private fun verifyInitialized() {
+        if (!inited) {
+            throw IllegalStateException("Not initialized")
         }
     }
 

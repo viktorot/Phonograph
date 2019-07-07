@@ -8,13 +8,12 @@ import androidx.annotation.LayoutRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.kabouzeid.gramophone.App
 import com.kabouzeid.gramophone.R
 import com.kabouzeid.gramophone.adapter.song.SongAdapter
 import com.kabouzeid.gramophone.model.Song
 import com.kabouzeid.gramophone.ui.fragments.mainactivity.library.LibraryFragment
-import com.kabouzeid.gramophone.util.PreferenceUtil
 import com.kabouzeid.gramophone.x.hide
 import com.kabouzeid.gramophone.x.isLandscape
 import com.kabouzeid.gramophone.x.show
@@ -84,35 +83,15 @@ class SongListView(
             return
         }
 
-//        recyclerView.layoutManager = when (showGrid(gridSize)) {
-//            false -> LinearLayoutManager(fragment.requireContext())
-//            true -> GridLayoutManager(fragment.requireContext(), gridSize)
-//        }
         recyclerView.layoutManager = GridLayoutManager(fragment.requireContext(), gridSize)
     }
 
-//    fun getMaxGridSize(): Int {
-//        return when (fragment.isLandscape) {
-//            true -> fragment.resources.getInteger(R.integer.max_columns_land)
-//            false -> fragment.resources.getInteger(R.integer.max_columns)
-//        }
-//    }
-//
-//    fun getMaxGridSizeForList(): Int {
-//        return when (fragment.isLandscape) {
-//            true -> fragment.resources.getInteger(R.integer.default_list_columns_land)
-//            false -> fragment.resources.getInteger(R.integer.default_list_columns)
-//        }
-//    }
-
     fun loadGridSize(): Int {
-        val ctx = fragment.requireContext()
-        return PreferenceUtil.getInstance(ctx).getSongGridSize(ctx)
+        return App.get(fragment.requireContext()).sizeManager.get()
     }
 
     fun loadGridSizeLand(): Int {
-        val ctx = fragment.requireContext()
-        return PreferenceUtil.getInstance(ctx).getSongGridSizeLand(ctx)
+        return App.get(fragment.requireContext()).sizeManager.get()
     }
 
     fun getGridSize(): Int {

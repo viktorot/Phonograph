@@ -74,6 +74,12 @@ public class LibraryFragment extends AbsMainActivityFragment implements CabHolde
     }
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        App.get(requireContext()).sizeManager.init(Util.isLandscape(getResources()));
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_library, container, false);
         unbinder = ButterKnife.bind(this, view);
@@ -404,7 +410,7 @@ public class LibraryFragment extends AbsMainActivityFragment implements CabHolde
             item.setChecked(true);
 //            fragment.setAndSaveGridSize(gridSize);
 
-            App.get(requireContext()).sizeManager.set(gridSize, Util.isLandscape(getResources()));
+            App.get(requireContext()).sizeManager.set(gridSize);
 
 //            toolbar.getMenu().findItem(R.id.action_colored_footers).setEnabled(fragment.canUsePalette());
             return true;
