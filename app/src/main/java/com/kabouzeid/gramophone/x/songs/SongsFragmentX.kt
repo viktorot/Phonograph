@@ -12,12 +12,17 @@ import com.kabouzeid.gramophone.App
 import com.kabouzeid.gramophone.R
 import com.kabouzeid.gramophone.model.Song
 import com.kabouzeid.gramophone.repo.SongRepo
+import com.kabouzeid.gramophone.x.isLandscape
+import com.kabouzeid.gramophone.x.theming.ItemSizeManager
+import com.kabouzeid.gramophone.x.theming.getMaxGridItemCount
 import kotlinx.coroutines.launch
 
 class SongsViewModelX(app: Application) : AndroidViewModel(app) {
 
     private val _songs: MutableLiveData<List<Song>> = MutableLiveData()
     val songs: LiveData<List<Song>> = _songs
+
+    //private val sizeManager: ItemSizeManager = App.get(app).sizeManager
 
     fun load() {
         viewModelScope.launch {
@@ -39,10 +44,12 @@ class SongsFragmentX : Fragment() {
         super.onCreate(savedInstanceState)
         vm = ViewModelProviders.of(this).get(SongsViewModelX::class.java)
 
-        vm.songs.observe(this, Observer(listView::onDataChanged))
+        vm.songs.observe(this, Observer { data ->
+            listView.onDataChanged(data)
+        })
 
         App.get(requireContext()).sizeManager.size.observe(this, Observer { size ->
-            Log.d("---", "new size => ${size}")
+            listView.onItemSizeChanged(size)
         })
     }
 
@@ -73,6 +80,6 @@ class SongsFragmentX : Fragment() {
     }
 
     fun getMaxGridSize(): Int {
-        return listView.getMaxGridSize()
+        return getMaxGridItemCount(isLandscape)
     }
 }

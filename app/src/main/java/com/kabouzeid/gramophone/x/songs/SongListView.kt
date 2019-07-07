@@ -1,6 +1,5 @@
 package com.kabouzeid.gramophone.x.songs
 
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,6 +7,7 @@ import android.widget.TextView
 import androidx.annotation.LayoutRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.kabouzeid.gramophone.R
@@ -18,6 +18,7 @@ import com.kabouzeid.gramophone.util.PreferenceUtil
 import com.kabouzeid.gramophone.x.hide
 import com.kabouzeid.gramophone.x.isLandscape
 import com.kabouzeid.gramophone.x.show
+import com.kabouzeid.gramophone.x.theming.showGrid
 
 class SongListView(
         private val fragment: Fragment,
@@ -32,9 +33,13 @@ class SongListView(
 
     fun inflate(inflater: LayoutInflater, parent: ViewGroup): View {
         val view = inflater.inflate(layoutResId, parent, false)
-        initContainer(view)
-        initEmptyView(view)
-        initRecyclerView(view)
+
+        container = view.findViewById(R.id.container)
+        empty = view.findViewById(android.R.id.empty)
+        recyclerView = view.findViewById(R.id.recycler_view)
+
+        initLayoutManager()
+        initAdapter()
 
         return view
     }
@@ -54,18 +59,13 @@ class SongListView(
         }
     }
 
-    private fun initContainer(view: View) {
-        container = view.findViewById(R.id.container)
+
+    fun onItemSizeChanged(size: Int) {
+        gridSize = size
+        initLayoutManager()
     }
 
-    private fun initEmptyView(view: View) {
-        empty = view.findViewById(android.R.id.empty)
-    }
-
-    private fun initRecyclerView(view: View) {
-        recyclerView = view.findViewById(R.id.recycler_view)
-        recyclerView.layoutManager = LinearLayoutManager(fragment.requireContext())
-
+    private fun initAdapter() {
         val itemLayoutRes = getItemLayoutRes()
 
         val parent = fragment.parentFragment as LibraryFragment
@@ -79,19 +79,31 @@ class SongListView(
         recyclerView.adapter = SongAdapter(act, ArrayList(), itemLayoutRes, false, parent)
     }
 
-    fun getMaxGridSize(): Int {
-        return when (fragment.isLandscape) {
-            true -> fragment.resources.getInteger(R.integer.max_columns_land)
-            false -> fragment.resources.getInteger(R.integer.max_columns)
+    private fun initLayoutManager() {
+        if (gridSize == 0) {
+            return
         }
+
+//        recyclerView.layoutManager = when (showGrid(gridSize)) {
+//            false -> LinearLayoutManager(fragment.requireContext())
+//            true -> GridLayoutManager(fragment.requireContext(), gridSize)
+//        }
+        recyclerView.layoutManager = GridLayoutManager(fragment.requireContext(), gridSize)
     }
 
-    fun getMaxGridSizeForList(): Int {
-        return when (fragment.isLandscape) {
-            true -> fragment.resources.getInteger(R.integer.default_list_columns_land)
-            false -> fragment.resources.getInteger(R.integer.default_list_columns)
-        }
-    }
+//    fun getMaxGridSize(): Int {
+//        return when (fragment.isLandscape) {
+//            true -> fragment.resources.getInteger(R.integer.max_columns_land)
+//            false -> fragment.resources.getInteger(R.integer.max_columns)
+//        }
+//    }
+//
+//    fun getMaxGridSizeForList(): Int {
+//        return when (fragment.isLandscape) {
+//            true -> fragment.resources.getInteger(R.integer.default_list_columns_land)
+//            false -> fragment.resources.getInteger(R.integer.default_list_columns)
+//        }
+//    }
 
     fun loadGridSize(): Int {
         val ctx = fragment.requireContext()
@@ -115,8 +127,9 @@ class SongListView(
 
     @LayoutRes
     private fun getItemLayoutRes(): Int {
-        return if (getGridSize() > getMaxGridSizeForList()) {
-            R.layout.item_grid
-        } else R.layout.item_list
+        return when (showGrid(gridSize)) {
+            true -> R.layout.item_grid
+            false -> R.layout.item_list
+        }
     }
 }
