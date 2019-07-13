@@ -26,7 +26,7 @@ class SongsViewModelX(
 
     fun load() {
         viewModelScope.launch {
-            //delay(5000)
+//            delay(5000)
             val songs = repository.getSongs()
             _songs.value = songs.toList()
         }
@@ -45,18 +45,23 @@ class SongsViewModelXFactory @Inject constructor(
 
 class SongsFragmentX : Fragment() {
 
-    private lateinit var vm: SongsViewModelX
+    private lateinit var component: SongsComponent
+
+    private val vm: SongsViewModelX by lazy {
+        ViewModelProviders
+                .of(this, component.factory())
+                .get(SongsViewModelX::class.java)
+    }
 
     private val listView: SongListView = SongListView(this, R.layout.view_songs_list)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val component: SongsComponent = DaggerSongsComponent.builder()
+        // TODO handle component lifecycle
+        component = DaggerSongsComponent.builder()
                 .context(requireContext())
                 .build()
-
-        vm = ViewModelProviders.of(this, component.factory()).get(SongsViewModelX::class.java)
 
         vm.songs.observe(this, Observer { data ->
             listView.onDataChanged(data)
