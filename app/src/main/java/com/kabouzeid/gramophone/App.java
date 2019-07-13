@@ -3,6 +3,7 @@ package com.kabouzeid.gramophone;
 import android.app.Application;
 import android.content.Context;
 import android.os.Build;
+
 import androidx.annotation.NonNull;
 
 import com.anjlab.android.iab.v3.BillingProcessor;
@@ -23,7 +24,7 @@ public class App extends Application {
     private static App app;
 
     public static App get(Context context) {
-        return (App )context.getApplicationContext();
+        return (App) context.getApplicationContext();
     }
 
     private BillingProcessor billingProcessor;

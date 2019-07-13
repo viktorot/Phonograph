@@ -1,13 +1,10 @@
 package com.kabouzeid.gramophone.ui.fragments.mainactivity.library.pager
 
-import android.app.Application
 import android.content.Context
 import android.os.Bundle
-import androidx.lifecycle.*
 import androidx.loader.app.LoaderManager
 import androidx.loader.content.Loader
 import androidx.recyclerview.widget.GridLayoutManager
-
 import com.kabouzeid.gramophone.R
 import com.kabouzeid.gramophone.adapter.song.ShuffleButtonSongAdapter
 import com.kabouzeid.gramophone.adapter.song.SongAdapter
@@ -15,14 +12,8 @@ import com.kabouzeid.gramophone.interfaces.LoaderIds
 import com.kabouzeid.gramophone.loader.SongLoader
 import com.kabouzeid.gramophone.misc.WrappedAsyncTaskLoader
 import com.kabouzeid.gramophone.model.Song
-import com.kabouzeid.gramophone.repo.SongRepo
 import com.kabouzeid.gramophone.util.PreferenceUtil
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-
-import java.util.ArrayList
+import java.util.*
 
 /**
  * @author Karim Abou Zeid (kabouzeid)

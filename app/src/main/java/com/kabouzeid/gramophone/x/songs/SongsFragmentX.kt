@@ -1,8 +1,6 @@
 package com.kabouzeid.gramophone.x.songs
 
-import android.app.Application
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,27 +9,38 @@ import androidx.lifecycle.*
 import com.kabouzeid.gramophone.App
 import com.kabouzeid.gramophone.R
 import com.kabouzeid.gramophone.model.Song
-import com.kabouzeid.gramophone.repo.SongRepo
+import com.kabouzeid.gramophone.x.data.ISongsRepository
 import com.kabouzeid.gramophone.x.isLandscape
-import com.kabouzeid.gramophone.x.theming.ItemSizeManager
+import com.kabouzeid.gramophone.x.songs.di.DaggerSongsComponent
+import com.kabouzeid.gramophone.x.songs.di.SongsComponent
 import com.kabouzeid.gramophone.x.theming.getMaxGridItemCount
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class SongsViewModelX(app: Application) : AndroidViewModel(app) {
+class SongsViewModelX(
+        private val repository: ISongsRepository
+) : ViewModel() {
 
     private val _songs: MutableLiveData<List<Song>> = MutableLiveData()
     val songs: LiveData<List<Song>> = _songs
 
-    //private val sizeManager: ItemSizeManager = App.get(app).sizeManager
-
     fun load() {
         viewModelScope.launch {
             //delay(5000)
-            val songs = SongRepo.getSongs(getApplication())
+            val songs = repository.getSongs()
             _songs.value = songs.toList()
         }
     }
+}
 
+class SongsViewModelXFactory @Inject constructor(
+        private val repository: ISongsRepository)
+    : ViewModelProvider.Factory {
+
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+        return SongsViewModelX(repository) as T
+    }
 }
 
 class SongsFragmentX : Fragment() {
@@ -42,7 +51,12 @@ class SongsFragmentX : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        vm = ViewModelProviders.of(this).get(SongsViewModelX::class.java)
+
+        val component: SongsComponent = DaggerSongsComponent.builder()
+                .context(requireContext())
+                .build()
+
+        vm = ViewModelProviders.of(this, component.factory()).get(SongsViewModelX::class.java)
 
         vm.songs.observe(this, Observer { data ->
             listView.onDataChanged(data)
