@@ -9,47 +9,45 @@ import androidx.lifecycle.*
 import com.kabouzeid.gramophone.App
 import com.kabouzeid.gramophone.R
 import com.kabouzeid.gramophone.model.Song
-import com.kabouzeid.gramophone.x.data.ISongsRepository
+import com.kabouzeid.gramophone.x.dal.ISongsRepository
+import com.kabouzeid.gramophone.x.data.Done
+import com.kabouzeid.gramophone.x.data.Loading
+import com.kabouzeid.gramophone.x.data.Resource
+import com.kabouzeid.gramophone.x.di.ComponentManager
 import com.kabouzeid.gramophone.x.isLandscape
-import com.kabouzeid.gramophone.x.songs.di.DaggerSongsComponent
 import com.kabouzeid.gramophone.x.songs.di.SongsComponent
+import com.kabouzeid.gramophone.x.theming.ItemSizeManager
 import com.kabouzeid.gramophone.x.theming.getMaxGridItemCount
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.lang.NullPointerException
 import javax.inject.Inject
 
-sealed class Resource<T> {
-    class Loading<T> : Resource<T>()
-    data class Done<T>(val data: T) : Resource<T>()
-    data class Error<T>(val error: Throwable) : Resource<T>()
-}
-
 class SongsViewModelX(
-        private val repository: ISongsRepository
+        private val repository: ISongsRepository,
+        private val itemSizeManager: ItemSizeManager
 ) : ViewModel() {
 
     private val _songs: MutableLiveData<Resource<List<Song>>> = MutableLiveData()
     val songs: LiveData<Resource<List<Song>>> = _songs
 
+    val size: LiveData<Int> = itemSizeManager.size
+
     fun load() {
-        _songs.value = Resource.Loading()
+        _songs.value = Loading()
 
         viewModelScope.launch {
-            delay(5000)
-            val songs = repository.getSongs()
-            _songs.value = Resource.Done(songs.toList())
+            _songs.value = repository.getSongs()
         }
     }
 }
 
 class SongsViewModelXFactory @Inject constructor(
-        private val repository: ISongsRepository)
-    : ViewModelProvider.Factory {
+        private val repository: ISongsRepository,
+        private val itemSizeManager: ItemSizeManager
+) : ViewModelProvider.Factory {
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-        return SongsViewModelX(repository) as T
+        return SongsViewModelX(repository, itemSizeManager) as T
     }
 }
 
@@ -72,25 +70,26 @@ class SongsFragmentX : Fragment() {
         super.onCreate(savedInstanceState)
 
         // TODO handle component lifecycle
-        component = DaggerSongsComponent.builder()
-                .context(requireContext())
+        component = ComponentManager.appComponent
+                .songsComponentBuilder()
                 .build()
+                .also { ComponentManager.add(it) }
 
         vm.songs.observe(this, Observer { data ->
             when (data) {
-                is Resource.Loading -> {
+                is Loading -> {
                     progressView.show()
                     emptyView.hide()
                     listView.hide()
                     errorView.hide()
                 }
-                is Resource.Error -> {
+                is Error -> {
                     progressView.hide()
                     emptyView.hide()
                     listView.hide()
                     errorView.show()
                 }
-                is Resource.Done -> {
+                is Done -> {
                     progressView.hide()
                     errorView.hide()
 
@@ -103,14 +102,14 @@ class SongsFragmentX : Fragment() {
                             listView.show()
                             emptyView.hide()
                         }
-
                     }
+
                     listView.onDataChanged(data.data)
                 }
             }
         })
 
-        App.get(requireContext()).sizeManager.size.observe(this, Observer { size ->
+        vm.size.observe(this, Observer { size ->
             listView.onItemSizeChanged(size)
         })
     }
@@ -128,6 +127,11 @@ class SongsFragmentX : Fragment() {
         vm.load()
 
         return view
+    }
+
+    override fun onDestroy() {
+        ComponentManager.remove(component)
+        super.onDestroy()
     }
 
 

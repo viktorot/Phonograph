@@ -1,23 +1,18 @@
 package com.kabouzeid.gramophone.x.songs.di
 
-import android.content.Context
-import androidx.fragment.app.Fragment
+import com.kabouzeid.gramophone.x.di.AppComponent
+import com.kabouzeid.gramophone.x.di.SubcomponentScope
 import com.kabouzeid.gramophone.x.songs.SongsFragmentX
 import com.kabouzeid.gramophone.x.songs.SongsViewModelXFactory
 import dagger.BindsInstance
-import dagger.Component
-import javax.inject.Singleton
+import dagger.Subcomponent
 
-@Singleton
-@Component(modules = [SongsModule::class])
+@SubcomponentScope
+@Subcomponent(modules = [SongsModule::class])
 interface SongsComponent {
 
-    @Component.Builder
+    @Subcomponent.Builder
     abstract class Builder {
-
-        @BindsInstance
-        abstract fun context(context: Context): Builder
-
         abstract fun build(): SongsComponent
     }
 

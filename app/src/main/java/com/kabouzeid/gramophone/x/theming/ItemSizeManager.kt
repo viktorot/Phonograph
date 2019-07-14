@@ -4,9 +4,9 @@ import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.kabouzeid.gramophone.util.PreferenceUtil
-import java.lang.IllegalStateException
+import javax.inject.Inject
 
-class ItemSizeManager(private val context: Context) {
+class ItemSizeManager @Inject constructor(private val context: Context) {
 
     private val _size = MutableLiveData<Int>()
     val size: LiveData<Int> = _size

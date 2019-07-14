@@ -10,6 +10,9 @@ import com.anjlab.android.iab.v3.BillingProcessor;
 import com.anjlab.android.iab.v3.TransactionDetails;
 import com.kabouzeid.appthemehelper.ThemeStore;
 import com.kabouzeid.gramophone.appshortcuts.DynamicShortcutManager;
+import com.kabouzeid.gramophone.x.di.AppComponent;
+import com.kabouzeid.gramophone.x.di.ComponentManager;
+import com.kabouzeid.gramophone.x.di.DaggerAppComponent;
 import com.kabouzeid.gramophone.x.theming.ItemSizeManager;
 
 
@@ -29,14 +32,17 @@ public class App extends Application {
 
     private BillingProcessor billingProcessor;
 
-    public ItemSizeManager sizeManager;
-
     @Override
     public void onCreate() {
         super.onCreate();
         app = this;
 
-        sizeManager = new ItemSizeManager(getApplicationContext());
+        AppComponent appComponent = DaggerAppComponent.builder()
+                .context(getApplicationContext())
+                .build();
+
+        ComponentManager.INSTANCE
+                .init(appComponent);
 
         // default theme
         if (!ThemeStore.isConfigured(this, 1)) {

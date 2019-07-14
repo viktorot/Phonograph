@@ -44,6 +44,7 @@ import com.kabouzeid.gramophone.ui.fragments.mainactivity.library.pager.SongsFra
 import com.kabouzeid.gramophone.util.PhonographColorUtil;
 import com.kabouzeid.gramophone.util.PreferenceUtil;
 import com.kabouzeid.gramophone.util.Util;
+import com.kabouzeid.gramophone.x.di.ComponentManager;
 import com.kabouzeid.gramophone.x.songs.SongsFragmentX;
 
 import butterknife.BindView;
@@ -76,7 +77,9 @@ public class LibraryFragment extends AbsMainActivityFragment implements CabHolde
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        App.get(requireContext()).sizeManager.init(Util.isLandscape(getResources()));
+        ComponentManager.INSTANCE.getAppComponent()
+                .itemSizeManager()
+                .init(Util.isLandscape(getResources()));
     }
 
     @Override
@@ -410,7 +413,7 @@ public class LibraryFragment extends AbsMainActivityFragment implements CabHolde
             item.setChecked(true);
 //            fragment.setAndSaveGridSize(gridSize);
 
-            App.get(requireContext()).sizeManager.set(gridSize);
+            ComponentManager.INSTANCE.getAppComponent().itemSizeManager().set(gridSize);
 
 //            toolbar.getMenu().findItem(R.id.action_colored_footers).setEnabled(fragment.canUsePalette());
             return true;

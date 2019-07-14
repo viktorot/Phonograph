@@ -1,9 +1,8 @@
 package com.kabouzeid.gramophone.x.songs.di
 
 import android.content.Context
-import com.kabouzeid.gramophone.x.data.ISongsRepository
-import com.kabouzeid.gramophone.x.data.SongsRepository
-import com.kabouzeid.gramophone.x.songs.SongsViewModelXFactory
+import com.kabouzeid.gramophone.x.dal.ISongsRepository
+import com.kabouzeid.gramophone.x.dal.SongsRepository
 import dagger.Module
 import dagger.Provides
 

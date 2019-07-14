@@ -21,6 +21,7 @@ import com.kabouzeid.gramophone.glide.PhonographColoredTarget
 import com.kabouzeid.gramophone.glide.SongGlideRequest
 import com.kabouzeid.gramophone.model.Song
 import com.kabouzeid.gramophone.util.MusicUtil
+import com.kabouzeid.gramophone.x.di.ComponentManager
 import com.kabouzeid.gramophone.x.hide
 import com.kabouzeid.gramophone.x.isLandscape
 import com.kabouzeid.gramophone.x.show
@@ -181,11 +182,11 @@ class SongListView(
     }
 
     fun loadGridSize(): Int {
-        return App.get(fragment.requireContext()).sizeManager.get()
+        return ComponentManager.appComponent.itemSizeManager().get()
     }
 
     fun loadGridSizeLand(): Int {
-        return App.get(fragment.requireContext()).sizeManager.get()
+        return ComponentManager.appComponent.itemSizeManager().get()
     }
 
     fun getGridSize(): Int {
