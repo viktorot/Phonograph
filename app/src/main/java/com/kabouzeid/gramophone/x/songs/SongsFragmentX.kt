@@ -14,21 +14,31 @@ import com.kabouzeid.gramophone.x.isLandscape
 import com.kabouzeid.gramophone.x.songs.di.DaggerSongsComponent
 import com.kabouzeid.gramophone.x.songs.di.SongsComponent
 import com.kabouzeid.gramophone.x.theming.getMaxGridItemCount
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.lang.NullPointerException
 import javax.inject.Inject
+
+sealed class Resource<T> {
+    class Loading<T> : Resource<T>()
+    data class Done<T>(val data: T) : Resource<T>()
+    data class Error<T>(val error: Throwable) : Resource<T>()
+}
 
 class SongsViewModelX(
         private val repository: ISongsRepository
 ) : ViewModel() {
 
-    private val _songs: MutableLiveData<List<Song>> = MutableLiveData()
-    val songs: LiveData<List<Song>> = _songs
+    private val _songs: MutableLiveData<Resource<List<Song>>> = MutableLiveData()
+    val songs: LiveData<Resource<List<Song>>> = _songs
 
     fun load() {
+        _songs.value = Resource.Loading()
+
         viewModelScope.launch {
-//            delay(5000)
+            delay(5000)
             val songs = repository.getSongs()
-            _songs.value = songs.toList()
+            _songs.value = Resource.Done(songs.toList())
         }
     }
 }
@@ -53,7 +63,10 @@ class SongsFragmentX : Fragment() {
                 .get(SongsViewModelX::class.java)
     }
 
-    private val listView: SongListView = SongListView(this, R.layout.view_songs_list)
+    private val listView = SongListView(this, R.layout.view_songs_list)
+    private val emptyView = SongsListEmptyView(R.layout.view_songs_empty)
+    private val errorView = SongsListErrorView(R.layout.view_songs_error)
+    private val progressView = SongsListEmptyView(R.layout.view_songs_progress)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,7 +77,37 @@ class SongsFragmentX : Fragment() {
                 .build()
 
         vm.songs.observe(this, Observer { data ->
-            listView.onDataChanged(data)
+            when (data) {
+                is Resource.Loading -> {
+                    progressView.show()
+                    emptyView.hide()
+                    listView.hide()
+                    errorView.hide()
+                }
+                is Resource.Error -> {
+                    progressView.hide()
+                    emptyView.hide()
+                    listView.hide()
+                    errorView.show()
+                }
+                is Resource.Done -> {
+                    progressView.hide()
+                    errorView.hide()
+
+                    when (data.data.isEmpty()) {
+                        true -> {
+                            listView.hide()
+                            emptyView.show()
+                        }
+                        false -> {
+                            listView.show()
+                            emptyView.hide()
+                        }
+
+                    }
+                    listView.onDataChanged(data.data)
+                }
+            }
         })
 
         App.get(requireContext()).sizeManager.size.observe(this, Observer { size ->
@@ -77,6 +120,9 @@ class SongsFragmentX : Fragment() {
 
         (view as ViewGroup).run {
             this.addView(listView.inflate(inflater, this))
+            this.addView(emptyView.inflate(inflater, this))
+            this.addView(progressView.inflate(inflater, this))
+            this.addView(errorView.inflate(inflater, this))
         }
 
         vm.load()

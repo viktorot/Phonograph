@@ -45,8 +45,6 @@ class SongListItemView(itemView: View) : RecyclerView.ViewHolder(itemView) {
     }
 
     init {
-        ButterKnife.bind(this, itemView)
-
         image = itemView.findViewById(R.id.image)
         imageText = itemView.findViewById(R.id.image_text)
         title = itemView.findViewById(R.id.title)
@@ -117,13 +115,11 @@ class SongListView(
 
     private lateinit var container: View
     private lateinit var recyclerView: RecyclerView
-    private lateinit var empty: TextView
 
     fun inflate(inflater: LayoutInflater, parent: ViewGroup): View {
         val view = inflater.inflate(layoutResId, parent, false)
 
         container = view.findViewById(R.id.container)
-        empty = view.findViewById(android.R.id.empty)
         recyclerView = view.findViewById(R.id.recycler_view)
 
         initLayoutManager()
@@ -132,19 +128,27 @@ class SongListView(
         return view
     }
 
+    fun show() {
+        container.show()
+    }
+
+    fun hide() {
+        container.hide()
+    }
+
     fun onDataChanged(data: List<Song>) {
         (recyclerView.adapter as SongsFragmentAdapterX).setData(data)
 
-        when (data.isEmpty()) {
-            true -> {
-                recyclerView.hide()
-                empty.show()
-            }
-            false -> {
-                recyclerView.show()
-                empty.hide()
-            }
-        }
+//        when (data.isEmpty()) {
+//            true -> {
+//                recyclerView.hide()
+//                empty.show()
+//            }
+//            false -> {
+//                recyclerView.show()
+//                empty.hide()
+//            }
+//        }
     }
 
 
