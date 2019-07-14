@@ -21,6 +21,9 @@ import com.kabouzeid.gramophone.glide.PhonographColoredTarget
 import com.kabouzeid.gramophone.glide.SongGlideRequest
 import com.kabouzeid.gramophone.model.Song
 import com.kabouzeid.gramophone.util.MusicUtil
+import com.kabouzeid.gramophone.x.data.Done
+import com.kabouzeid.gramophone.x.data.Error
+import com.kabouzeid.gramophone.x.data.Resource
 import com.kabouzeid.gramophone.x.di.ComponentManager
 import com.kabouzeid.gramophone.x.hide
 import com.kabouzeid.gramophone.x.isLandscape
@@ -137,21 +140,20 @@ class SongListView(
         container.hide()
     }
 
-    fun onDataChanged(data: List<Song>) {
-        (recyclerView.adapter as SongsFragmentAdapterX).setData(data)
+    fun render(data: Resource<List<Song>>) {
+        if (data !is Done) {
+            hide()
+            return
+        }
 
-//        when (data.isEmpty()) {
-//            true -> {
-//                recyclerView.hide()
-//                empty.show()
-//            }
-//            false -> {
-//                recyclerView.show()
-//                empty.hide()
-//            }
-//        }
+        when (data.data.isEmpty()) {
+            true -> hide()
+            false -> {
+                show()
+                (recyclerView.adapter as SongsFragmentAdapterX).setData(data.data)
+            }
+        }
     }
-
 
     fun onItemSizeChanged(size: Int) {
         gridSize = size

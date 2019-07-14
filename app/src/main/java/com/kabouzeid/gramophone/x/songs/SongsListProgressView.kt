@@ -6,6 +6,10 @@ import android.view.ViewGroup
 import androidx.annotation.LayoutRes
 import androidx.core.widget.ContentLoadingProgressBar
 import com.kabouzeid.gramophone.R
+import com.kabouzeid.gramophone.model.Song
+import com.kabouzeid.gramophone.x.data.Error
+import com.kabouzeid.gramophone.x.data.Loading
+import com.kabouzeid.gramophone.x.data.Resource
 import com.kabouzeid.gramophone.x.hide
 import com.kabouzeid.gramophone.x.show
 
@@ -21,11 +25,18 @@ class SongsListProgressView(@LayoutRes private val layoutResId: Int) {
         return view
     }
 
-    fun show() {
+    fun render(data: Resource<List<Song>>) {
+        when (data is Loading) {
+            true -> show()
+            false -> hide()
+        }
+    }
+
+    private fun show() {
         progress.show()
     }
 
-    fun hide() {
+    private fun hide() {
         progress.hide()
     }
 }

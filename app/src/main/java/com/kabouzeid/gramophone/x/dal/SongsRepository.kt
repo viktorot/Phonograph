@@ -12,7 +12,7 @@ class SongsRepository @Inject constructor(private val context: Context) : ISongs
 
     override suspend fun getSongs(): Resource<List<Song>> {
         delay(2500)
-        return Done(SongLoader.getAllSongs(context))
+        return Done(/*SongLoader.getAllSongs(context)*/ emptyList())
     }
 
 }

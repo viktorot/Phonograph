@@ -6,7 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import com.kabouzeid.gramophone.util.PreferenceUtil
 import javax.inject.Inject
 
-class ItemSizeManager @Inject constructor(private val context: Context) {
+open class ItemSizeManager @Inject constructor(private val context: Context) {
 
     private val _size = MutableLiveData<Int>()
     val size: LiveData<Int> = _size

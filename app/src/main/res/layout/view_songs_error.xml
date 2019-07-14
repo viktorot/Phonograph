@@ -5,12 +5,11 @@
     android:layout_height="match_parent">
 
     <TextView
-        android:id="@android:id/empty"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:fontFamily="sans-serif-light"
-        android:text="[Error loading songs]"
+        android:text="[ERROR]"
         android:textColor="?android:textColorSecondary"
         android:textSize="@dimen/empty_text_size"
         android:visibility="visible" />
