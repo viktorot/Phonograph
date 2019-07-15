@@ -182,7 +182,6 @@ dependencies {
     annotationProcessor 'com.google.dagger:dagger-compiler:2.17'
 
     testImplementation "junit:junit:$junitVersion"
-    //testImplementation "org.mockito:mockito-core:$mockitoVersion"
     testImplementation "org.mockito:mockito-inline:2.18.0"
     testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.0.0"
     testImplementation "org.hamcrest:hamcrest-all:$hamcrestVersion"

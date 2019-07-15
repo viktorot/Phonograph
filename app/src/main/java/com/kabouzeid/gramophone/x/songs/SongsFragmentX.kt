@@ -1,5 +1,6 @@
 package com.kabouzeid.gramophone.x.songs
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,11 +10,13 @@ import androidx.lifecycle.*
 import com.kabouzeid.gramophone.R
 import com.kabouzeid.gramophone.model.Song
 import com.kabouzeid.gramophone.x.dal.ISongsRepository
+import com.kabouzeid.gramophone.x.data.Error
 import com.kabouzeid.gramophone.x.data.Loading
 import com.kabouzeid.gramophone.x.data.Resource
 import com.kabouzeid.gramophone.x.di.ComponentManager
 import com.kabouzeid.gramophone.x.isLandscape
 import com.kabouzeid.gramophone.x.songs.di.SongsComponent
+import com.kabouzeid.gramophone.x.songs.di.SongsModule
 import com.kabouzeid.gramophone.x.theming.ItemSizeManager
 import com.kabouzeid.gramophone.x.theming.getMaxGridItemCount
 import com.kabouzeid.gramophone.x.utils.wrapEspressoIdlingResource
