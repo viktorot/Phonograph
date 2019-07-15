@@ -5,11 +5,11 @@ import com.kabouzeid.gramophone.model.Song
 import com.kabouzeid.gramophone.x.data.Done
 import com.kabouzeid.gramophone.x.data.Error
 import com.kabouzeid.gramophone.x.data.Loading
-import com.kabouzeid.gramophone.x.songs.SongsEmptyView
 import com.kabouzeid.gramophone.x.songs.SongsEmptyComponent
+import com.kabouzeid.gramophone.x.songs.SongsEmptyView
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mockito
+import org.mockito.Mockito.*
 
 class SongsEmptyViewTests {
 
@@ -18,22 +18,22 @@ class SongsEmptyViewTests {
     @Before
     fun setup() {
         component = MockSongsEmptyViewComponent().apply {
-            inflate(Mockito.mock(ViewGroup::class.java))
+            inflate(mock(ViewGroup::class.java))
         }
     }
 
     @Test
     fun test_handleLoadingState() {
         component.render(Loading())
-        Mockito.verify(component.view, Mockito.times(1)).hide()
-        Mockito.verify(component.view, Mockito.times(0)).show()
+        verify(component.view, times(1)).hide()
+        verify(component.view, times(0)).show()
     }
 
     @Test
     fun test_handleErrorState() {
         component.render(Error())
-        Mockito.verify(component.view, Mockito.times(1)).hide()
-        Mockito.verify(component.view, Mockito.times(0)).show()
+        verify(component.view, times(1)).hide()
+        verify(component.view, times(0)).show()
     }
 
     @Test
@@ -44,15 +44,15 @@ class SongsEmptyViewTests {
         )
 
         component.render(Done(data))
-        Mockito.verify(component.view, Mockito.times(1)).hide()
-        Mockito.verify(component.view, Mockito.times(0)).show()
+        verify(component.view, times(1)).hide()
+        verify(component.view, times(0)).show()
     }
 
     @Test
     fun test_handleDoneState_NoData() {
         component.render(Done(emptyList()))
-        Mockito.verify(component.view, Mockito.times(0)).hide()
-        Mockito.verify(component.view, Mockito.times(1)).show()
+        verify(component.view, times(0)).hide()
+        verify(component.view, times(1)).show()
     }
 
 }
@@ -60,6 +60,6 @@ class SongsEmptyViewTests {
 class MockSongsEmptyViewComponent : SongsEmptyComponent() {
 
     override fun _inflate(container: ViewGroup): SongsEmptyView {
-        return Mockito.mock(SongsEmptyView::class.java)
+        return mock(SongsEmptyView::class.java)
     }
 }

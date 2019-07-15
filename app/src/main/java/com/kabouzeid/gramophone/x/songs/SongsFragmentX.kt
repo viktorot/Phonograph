@@ -62,7 +62,7 @@ class SongsFragmentX : Fragment() {
                 .get(SongsViewModelX::class.java)
     }
 
-    private val listComponent = SongListComponent()
+    private val listComponent = SongsListComponent()
     private val emptyComponent = SongsEmptyComponent()
     private val errorComponent = SongsErrorComponent()
     private val progressComponent = SongsProgressComponent()

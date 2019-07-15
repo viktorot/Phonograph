@@ -8,8 +8,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.PopupMenu
 import android.widget.TextView
-import androidx.annotation.LayoutRes
-import androidx.fragment.app.Fragment
+import androidx.annotation.VisibleForTesting
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -23,13 +22,10 @@ import com.kabouzeid.gramophone.model.Song
 import com.kabouzeid.gramophone.util.MusicUtil
 import com.kabouzeid.gramophone.x.data.Done
 import com.kabouzeid.gramophone.x.data.Resource
-import com.kabouzeid.gramophone.x.di.ComponentManager
 import com.kabouzeid.gramophone.x.hide
-import com.kabouzeid.gramophone.x.isLandscape
 import com.kabouzeid.gramophone.x.show
-import com.kabouzeid.gramophone.x.theming.showGrid
 
-class SongListItemView(itemView: View) : RecyclerView.ViewHolder(itemView) {
+class SongsListItemView(itemView: View) : RecyclerView.ViewHolder(itemView) {
     internal var image: ImageView? = null
     internal var imageText: TextView? = null
     internal var title: TextView? = null
@@ -103,13 +99,13 @@ class SongListItemView(itemView: View) : RecyclerView.ViewHolder(itemView) {
     private fun setColors(color: Int) {
         paletteColorContainer?.run {
             this.setBackgroundColor(color)
-            this@SongListItemView.title?.setTextColor(MaterialValueHelper.getPrimaryTextColor(context, ColorUtil.isColorLight(color)))
-            this@SongListItemView.text?.setTextColor(MaterialValueHelper.getSecondaryTextColor(context, ColorUtil.isColorLight(color)))
+            this@SongsListItemView.title?.setTextColor(MaterialValueHelper.getPrimaryTextColor(context, ColorUtil.isColorLight(color)))
+            this@SongsListItemView.text?.setTextColor(MaterialValueHelper.getSecondaryTextColor(context, ColorUtil.isColorLight(color)))
         }
     }
 }
 
-class SongListView(container: ViewGroup) {
+class SongsListView(container: ViewGroup) {
 
     private val ctx: Context = container.context
 
@@ -150,12 +146,18 @@ class SongListView(container: ViewGroup) {
     }
 }
 
-class SongListComponent {
+open class SongsListComponent {
 
-    lateinit var view: SongListView
+    @VisibleForTesting
+    lateinit var view: SongsListView
+
+    @VisibleForTesting
+    open fun _inflate(container: ViewGroup): SongsListView {
+        return SongsListView(container)
+    }
 
     fun inflate(container: ViewGroup) {
-        view = SongListView(container)
+        view = _inflate(container)
     }
 
     fun render(data: Resource<List<Song>>) {

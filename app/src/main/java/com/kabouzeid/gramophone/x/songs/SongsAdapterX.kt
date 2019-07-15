@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.kabouzeid.gramophone.R
 import com.kabouzeid.gramophone.model.Song
 
-class SongsAdapterX(private val context: Context) : RecyclerView.Adapter<SongListItemView>() {
+class SongsAdapterX(private val context: Context) : RecyclerView.Adapter<SongsListItemView>() {
 
     companion object {
         @JvmStatic
@@ -41,17 +41,17 @@ class SongsAdapterX(private val context: Context) : RecyclerView.Adapter<SongLis
         return viewType
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SongListItemView {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SongsListItemView {
         val layoutResId = when (viewType) {
             TYPE_GRID -> R.layout.item_grid
             else -> R.layout.item_list
         }
 
         val view = LayoutInflater.from(parent.context).inflate(layoutResId, parent, false)
-        return SongListItemView(view)
+        return SongsListItemView(view)
     }
 
-    override fun onBindViewHolder(holder: SongListItemView, position: Int) {
+    override fun onBindViewHolder(holder: SongsListItemView, position: Int) {
         val song = data[position]
 
         holder.render(
