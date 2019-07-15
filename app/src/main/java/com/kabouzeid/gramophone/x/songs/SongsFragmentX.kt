@@ -1,6 +1,5 @@
 package com.kabouzeid.gramophone.x.songs
 
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,13 +9,11 @@ import androidx.lifecycle.*
 import com.kabouzeid.gramophone.R
 import com.kabouzeid.gramophone.model.Song
 import com.kabouzeid.gramophone.x.dal.ISongsRepository
-import com.kabouzeid.gramophone.x.data.Error
 import com.kabouzeid.gramophone.x.data.Loading
 import com.kabouzeid.gramophone.x.data.Resource
 import com.kabouzeid.gramophone.x.di.ComponentManager
 import com.kabouzeid.gramophone.x.isLandscape
 import com.kabouzeid.gramophone.x.songs.di.SongsComponent
-import com.kabouzeid.gramophone.x.songs.di.SongsModule
 import com.kabouzeid.gramophone.x.theming.ItemSizeManager
 import com.kabouzeid.gramophone.x.theming.getMaxGridItemCount
 import com.kabouzeid.gramophone.x.utils.wrapEspressoIdlingResource
@@ -25,13 +22,13 @@ import javax.inject.Inject
 
 class SongsViewModelX(
         private val repository: ISongsRepository,
-        private val itemSizeManager: ItemSizeManager
+        itemSizeManager: ItemSizeManager
 ) : ViewModel() {
 
     private val _songs: MutableLiveData<Resource<List<Song>>> = MutableLiveData()
     val songs: LiveData<Resource<List<Song>>> = _songs
 
-    val size: LiveData<Int> = itemSizeManager.size
+    val size: LiveData<Int> = Transformations.distinctUntilChanged(itemSizeManager.size)
 
     fun load() {
         wrapEspressoIdlingResource {
@@ -65,10 +62,10 @@ class SongsFragmentX : Fragment() {
                 .get(SongsViewModelX::class.java)
     }
 
-    private val listView = SongListView(this, R.layout.view_songs_list)
-    private val emptyView = SongsEmptyViewComponent()
-    private val errorView = SongsListErrorView(R.layout.view_songs_error)
-    private val progressView = SongsListProgressView(R.layout.view_songs_progress)
+    private val listComponent = SongListComponent()
+    private val emptyComponent = SongsEmptyComponent()
+    private val errorComponent = SongsErrorComponent()
+    private val progressComponent = SongsProgressComponent()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,14 +77,14 @@ class SongsFragmentX : Fragment() {
                 .also { ComponentManager.add(it) }
 
         vm.songs.observe(this, Observer { data ->
-            progressView.render(data)
-            emptyView.render(data)
-            listView.render(data)
-            errorView.render(data)
+            progressComponent.render(data)
+            emptyComponent.render(data)
+            listComponent.render(data)
+            errorComponent.render(data)
         })
 
         vm.size.observe(this, Observer { size ->
-            listView.onItemSizeChanged(size)
+            listComponent.onItemSizeChanged(size)
         })
     }
 
@@ -95,11 +92,10 @@ class SongsFragmentX : Fragment() {
         val view = inflater.inflate(R.layout.fragment_songs_x, container, false)
 
         (view as ViewGroup).run {
-            this.addView(listView.inflate(inflater, this))
-            this.addView(progressView.inflate(inflater, this))
-            this.addView(errorView.inflate(inflater, this))
-
-            emptyView.inflate(this)
+            listComponent.inflate(this)
+            progressComponent.inflate(this)
+            errorComponent.inflate(this)
+            emptyComponent.inflate(this)
         }
 
         vm.load()
@@ -112,7 +108,6 @@ class SongsFragmentX : Fragment() {
         super.onDestroy()
     }
 
-
     /* MOVE TO SEPARATE COMPONENT/BASE CLASS */
     fun canUsePalette(): Boolean {
         return false
@@ -123,7 +118,7 @@ class SongsFragmentX : Fragment() {
     }
 
     fun getGridSize(): Int {
-        return listView.getGridSize()
+        return ComponentManager.appComponent.itemSizeManager().get()
     }
 
     fun getMaxGridSize(): Int {

@@ -58,4 +58,17 @@ class SongsFragmentTests {
 
         onView(withId(android.R.id.empty)).check(matches(isDisplayed()))
     }
+
+    @Test
+    fun test_handleDataState() {
+        SongsModule.fakeRespository = object : ISongsRepository {
+            override suspend fun getSongs(): Resource<List<Song>> = runBlocking {
+                Done<List<Song>>(listOf(Song.EMPTY_SONG))
+            }
+        }
+
+        val scenario = launchFragmentInContainer<SongsFragmentX>()
+
+        onView(withId(R.id.recycler_view)).check(matches(isDisplayed()))
+    }
 }

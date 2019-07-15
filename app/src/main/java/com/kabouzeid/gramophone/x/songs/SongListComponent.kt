@@ -1,5 +1,6 @@
 package com.kabouzeid.gramophone.x.songs
 
+import android.content.Context
 import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
@@ -10,19 +11,17 @@ import android.widget.TextView
 import androidx.annotation.LayoutRes
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import butterknife.ButterKnife
 import com.bumptech.glide.Glide
 import com.kabouzeid.appthemehelper.util.ColorUtil
 import com.kabouzeid.appthemehelper.util.MaterialValueHelper
-import com.kabouzeid.gramophone.App
 import com.kabouzeid.gramophone.R
 import com.kabouzeid.gramophone.glide.PhonographColoredTarget
 import com.kabouzeid.gramophone.glide.SongGlideRequest
 import com.kabouzeid.gramophone.model.Song
 import com.kabouzeid.gramophone.util.MusicUtil
 import com.kabouzeid.gramophone.x.data.Done
-import com.kabouzeid.gramophone.x.data.Error
 import com.kabouzeid.gramophone.x.data.Resource
 import com.kabouzeid.gramophone.x.di.ComponentManager
 import com.kabouzeid.gramophone.x.hide
@@ -68,7 +67,7 @@ class SongListItemView(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
         when (separator) {
             true -> shortSeparator?.show()
-            false ->shortSeparator?.hide()
+            false -> shortSeparator?.hide()
         }
 
         title?.text = data.title
@@ -110,102 +109,80 @@ class SongListItemView(itemView: View) : RecyclerView.ViewHolder(itemView) {
     }
 }
 
-class SongListView(
-        private val fragment: Fragment,
-        @LayoutRes private val layoutResId: Int
-) {
+class SongListView(container: ViewGroup) {
 
-    private var gridSize: Int = 0
+    private val ctx: Context = container.context
 
-    private lateinit var container: View
-    private lateinit var recyclerView: RecyclerView
+    private val view: RecyclerView = LayoutInflater.from(container.context)
+            .inflate(R.layout.view_songs_list, container, true)
+            .findViewById(R.id.recycler_view)
 
-    fun inflate(inflater: LayoutInflater, parent: ViewGroup): View {
-        val view = inflater.inflate(layoutResId, parent, false)
+    private val adapter: SongsAdapterX = SongsAdapterX(container.context)
 
-        container = view.findViewById(R.id.container)
-        recyclerView = view.findViewById(R.id.recycler_view)
+    init {
+        view.adapter = adapter
+    }
 
-        initLayoutManager()
-        initAdapter()
+    fun displayAsGrid(size: Int) {
+        view.layoutManager = GridLayoutManager(ctx, size)
+        adapter.showGridItems()
+    }
 
-        return view
+    fun displayAsList() {
+        view.layoutManager = LinearLayoutManager(ctx)
+        adapter.showListItems()
     }
 
     fun show() {
-        container.show()
+        view.show()
     }
 
     fun hide() {
-        container.hide()
+        view.hide()
+    }
+
+    fun update(data: List<Song>) {
+        adapter.setData(data)
+    }
+
+    fun invalidate() {
+        adapter.notifyDataSetChanged()
+    }
+}
+
+class SongListComponent {
+
+    lateinit var view: SongListView
+
+    fun inflate(container: ViewGroup) {
+        view = SongListView(container)
     }
 
     fun render(data: Resource<List<Song>>) {
         if (data !is Done) {
-            hide()
+            view.hide()
             return
         }
 
         when (data.data.isEmpty()) {
-            true -> hide()
+            true -> view.hide()
             false -> {
-                show()
-                (recyclerView.adapter as SongsFragmentAdapterX).setData(data.data)
+                view.show()
+                view.update(data.data)
             }
         }
     }
 
     fun onItemSizeChanged(size: Int) {
-        gridSize = size
-        initLayoutManager()
-    }
-
-    private fun initAdapter() {
-//        val itemLayoutRes = getItemLayoutRes()
-//
-//        val parent = fragment.parentFragment as LibraryFragment
-//        val act = fragment.requireActivity() as AppCompatActivity
-
-//        val data = (1..10).map {
-//            Song(it, "Title", it, 2000, 100, "data", 1000000L,
-//                    1, "Album", 2, "Artist")
-//        }
-
-        //recyclerView.adapter = SongAdapter(act, ArrayList(), itemLayoutRes, false, parent)
-        recyclerView.adapter = SongsFragmentAdapterX(fragment.requireContext())
-    }
-
-    private fun initLayoutManager() {
-        if (gridSize == 0) {
-            return
-        }
-
-        recyclerView.layoutManager = GridLayoutManager(fragment.requireContext(), gridSize)
-    }
-
-    fun loadGridSize(): Int {
-        return ComponentManager.appComponent.itemSizeManager().get()
-    }
-
-    fun loadGridSizeLand(): Int {
-        return ComponentManager.appComponent.itemSizeManager().get()
-    }
-
-    fun getGridSize(): Int {
-        if (gridSize == 0) {
-            gridSize = when (fragment.isLandscape) {
-                true -> loadGridSizeLand()
-                false -> loadGridSize()
+        when (size) {
+            1 -> {
+                view.displayAsList()
+                view.invalidate()
             }
-        }
-        return gridSize
-    }
-
-    @LayoutRes
-    private fun getItemLayoutRes(): Int {
-        return when (showGrid(gridSize)) {
-            true -> R.layout.item_grid
-            false -> R.layout.item_list
+            else -> {
+                view.displayAsGrid(size)
+                view.invalidate()
+            }
         }
     }
 }

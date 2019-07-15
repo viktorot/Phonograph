@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.kabouzeid.gramophone.R
 import com.kabouzeid.gramophone.model.Song
 
-class SongsFragmentAdapterX(private val context: Context) : RecyclerView.Adapter<SongListItemView>() {
+class SongsAdapterX(private val context: Context) : RecyclerView.Adapter<SongListItemView>() {
 
     companion object {
         @JvmStatic
@@ -17,6 +17,7 @@ class SongsFragmentAdapterX(private val context: Context) : RecyclerView.Adapter
     }
 
     private var viewType: Int = TYPE_LIST
+
     private var palette: Boolean = false
 
     private val data: MutableList<Song> = ArrayList()
@@ -26,6 +27,14 @@ class SongsFragmentAdapterX(private val context: Context) : RecyclerView.Adapter
         data.addAll(newData)
 
         notifyDataSetChanged()
+    }
+
+    fun showGridItems() {
+        viewType = TYPE_GRID
+    }
+
+    fun showListItems() {
+        viewType = TYPE_LIST
     }
 
     override fun getItemViewType(position: Int): Int {

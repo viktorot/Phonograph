@@ -3,20 +3,22 @@ package com.kabouzeid.gramophone.x.songs
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.LayoutRes
 import androidx.annotation.VisibleForTesting
 import com.kabouzeid.gramophone.R
 import com.kabouzeid.gramophone.model.Song
 import com.kabouzeid.gramophone.x.data.Done
+import com.kabouzeid.gramophone.x.data.Error
 import com.kabouzeid.gramophone.x.data.Resource
 import com.kabouzeid.gramophone.x.hide
 import com.kabouzeid.gramophone.x.show
 
-open class SongsEmptyView(container: ViewGroup) {
+open class SongsErrorView(container: ViewGroup) {
 
     private val view: View = LayoutInflater
             .from(container.context)
-            .inflate(R.layout.view_songs_empty, container, true)
-            .findViewById(android.R.id.empty)
+            .inflate(R.layout.view_songs_error, container, true)
+            .findViewById(R.id.error)
 
     fun show() {
         view.show()
@@ -25,17 +27,16 @@ open class SongsEmptyView(container: ViewGroup) {
     fun hide() {
         view.hide()
     }
-
 }
 
-open class SongsEmptyViewComponent {
+open class SongsErrorComponent {
 
     @VisibleForTesting
-    lateinit var view: SongsEmptyView
+    lateinit var view: SongsErrorView
 
     @VisibleForTesting
-    open fun _inflate(container: ViewGroup): SongsEmptyView {
-        return SongsEmptyView(container)
+    open fun _inflate(container: ViewGroup): SongsErrorView {
+        return SongsErrorView(container)
     }
 
     fun inflate(container: ViewGroup) {
@@ -43,14 +44,9 @@ open class SongsEmptyViewComponent {
     }
 
     fun render(data: Resource<List<Song>>) {
-        if (data !is Done) {
-            view.hide()
-            return
-        }
-
-        when (data.data.isEmpty()) {
-            true -> view.show()
-            false -> view.hide()
+        when (data) {
+            is Error -> view.show()
+            else -> view.hide()
         }
     }
 }
