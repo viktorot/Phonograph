@@ -3,15 +3,14 @@ package com.kabouzeid.gramophone.x.songs
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.annotation.LayoutRes
 import androidx.annotation.VisibleForTesting
 import com.kabouzeid.gramophone.R
 import com.kabouzeid.gramophone.model.Song
-import com.kabouzeid.gramophone.x.data.Done
 import com.kabouzeid.gramophone.x.data.Error
 import com.kabouzeid.gramophone.x.data.Resource
 import com.kabouzeid.gramophone.x.hide
 import com.kabouzeid.gramophone.x.show
+import kotlinx.coroutines.channels.Channel
 
 open class SongsErrorView(container: ViewGroup) {
 

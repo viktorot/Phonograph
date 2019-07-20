@@ -17,6 +17,8 @@ import com.kabouzeid.gramophone.x.di.ComponentManager;
 import com.kabouzeid.gramophone.x.di.DaggerAppComponent;
 import com.kabouzeid.gramophone.x.theming.ItemSizeManager;
 
+import timber.log.Timber;
+
 
 /**
  * @author Karim Abou Zeid (kabouzeid)
@@ -44,6 +46,10 @@ public class App extends MultiDexApplication {
     public void onCreate() {
         super.onCreate();
         app = this;
+
+        if (BuildConfig.DEBUG) {
+            Timber.plant(new Timber.DebugTree());
+        }
 
         AppComponent appComponent = DaggerAppComponent.builder()
                 .context(getApplicationContext())

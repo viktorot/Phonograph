@@ -17,11 +17,21 @@ import com.kabouzeid.gramophone.x.songs.di.SongsComponent
 import com.kabouzeid.gramophone.x.theming.ItemSizeManager
 import com.kabouzeid.gramophone.x.theming.getMaxGridItemCount
 import com.kabouzeid.gramophone.x.utils.wrapEspressoIdlingResource
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import timber.log.Timber
 import javax.inject.Inject
+
+sealed class SongsEvents {
+    object Reload : SongsEvents()
+}
 
 class SongsViewModelX(
         private val repository: ISongsRepository,
+        private val channel: Channel<SongsEvents>,
         itemSizeManager: ItemSizeManager
 ) : ViewModel() {
 
@@ -30,12 +40,23 @@ class SongsViewModelX(
 
     val size: LiveData<Int> = Transformations.distinctUntilChanged(itemSizeManager.size)
 
-    fun load() {
-        wrapEspressoIdlingResource {
-            _songs.value = Loading()
+    init {
+        viewModelScope.launch {
+            channelListener()
+        }
+    }
 
-            viewModelScope.launch {
-                _songs.value = repository.getSongs()
+    private suspend fun channelListener() {
+        channel.consumeEach { Timber.d("event => $it") }
+    }
+
+    fun load() = wrapEspressoIdlingResource {
+        _songs.value = Loading()
+
+        viewModelScope.launch(Dispatchers.Default) {
+            val result = repository.getSongs()
+            withContext(Dispatchers.Main) {
+                _songs.value = result
             }
         }
     }
@@ -43,12 +64,13 @@ class SongsViewModelX(
 
 class SongsViewModelXFactory @Inject constructor(
         private val repository: ISongsRepository,
-        private val itemSizeManager: ItemSizeManager
+        private val itemSizeManager: ItemSizeManager,
+        private val channel: Channel<SongsEvents>
 ) : ViewModelProvider.Factory {
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-        return SongsViewModelX(repository, itemSizeManager) as T
+        return SongsViewModelX(repository, channel, itemSizeManager) as T
     }
 }
 
