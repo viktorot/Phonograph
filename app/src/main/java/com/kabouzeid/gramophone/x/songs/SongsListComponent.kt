@@ -24,17 +24,25 @@ import com.kabouzeid.gramophone.x.data.Done
 import com.kabouzeid.gramophone.x.data.Resource
 import com.kabouzeid.gramophone.x.hide
 import com.kabouzeid.gramophone.x.show
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.launch
+import timber.log.Timber
 
-class SongsListItemView(itemView: View) : RecyclerView.ViewHolder(itemView) {
-    internal var image: ImageView? = null
-    internal var imageText: TextView? = null
-    internal var title: TextView? = null
-    internal var text: TextView? = null
-    internal var menu: View? = null
-    internal var separator: View? = null
-    internal var shortSeparator: View? = null
-    internal var dragView: View? = null
-    internal var paletteColorContainer: View? = null
+class SongsListItemView(itemView: View, private val channel: Channel<SongsEvents>) : RecyclerView.ViewHolder(itemView) {
+
+    var data: Int = -1
+
+    private val root: View = itemView.findViewById(R.id.root)
+    private var image: ImageView? = itemView.findViewById(R.id.image)
+    private var imageText: TextView? = itemView.findViewById(R.id.image_text)
+    private var title: TextView? = itemView.findViewById(R.id.title)
+    private var text: TextView? = itemView.findViewById(R.id.text)
+    private var menu: View? = itemView.findViewById(R.id.menu)
+    private var separator: View? = itemView.findViewById(R.id.separator)
+    private var shortSeparator: View? = itemView.findViewById(R.id.short_separator)
+    private var dragView: View? = itemView.findViewById(R.id.drag_view)
+    private var paletteColorContainer: View? = itemView.findViewById(R.id.palette_color_container)
 
     private fun buildPopup(anchor: View): PopupMenu {
         return PopupMenu(itemView.context, anchor).apply {
@@ -44,16 +52,9 @@ class SongsListItemView(itemView: View) : RecyclerView.ViewHolder(itemView) {
     }
 
     init {
-        image = itemView.findViewById(R.id.image)
-        imageText = itemView.findViewById(R.id.image_text)
-        title = itemView.findViewById(R.id.title)
-        text = itemView.findViewById(R.id.text)
-        menu = itemView.findViewById(R.id.menu)
-        separator = itemView.findViewById(R.id.separator)
-        shortSeparator = itemView.findViewById(R.id.short_separator)
-        dragView = itemView.findViewById(R.id.drag_view)
-        paletteColorContainer = itemView.findViewById(R.id.palette_color_container)
-
+        root.setOnClickListener {
+            GlobalScope.launch { channel.send(SongsEvents.Play(data)) }
+        }
         menu?.setOnClickListener { buildPopup(it).show() }
     }
 
@@ -105,7 +106,7 @@ class SongsListItemView(itemView: View) : RecyclerView.ViewHolder(itemView) {
     }
 }
 
-class SongsListView(container: ViewGroup) {
+class SongsListView(container: ViewGroup, channel: Channel<SongsEvents>) {
 
     private val ctx: Context = container.context
 
@@ -113,7 +114,7 @@ class SongsListView(container: ViewGroup) {
             .inflate(R.layout.view_songs_list, container, true)
             .findViewById(R.id.recycler_view)
 
-    private val adapter: SongsAdapterX = SongsAdapterX(container.context)
+    private val adapter: SongsAdapterX = SongsAdapterX(container.context, channel)
 
     init {
         view.adapter = adapter
@@ -152,12 +153,12 @@ open class SongsListComponent {
     lateinit var view: SongsListView
 
     @VisibleForTesting
-    open fun _inflate(container: ViewGroup): SongsListView {
-        return SongsListView(container)
+    open fun _inflate(container: ViewGroup, channel: Channel<SongsEvents>): SongsListView {
+        return SongsListView(container, channel)
     }
 
-    fun inflate(container: ViewGroup) {
-        view = _inflate(container)
+    fun inflate(container: ViewGroup, channel: Channel<SongsEvents>) {
+        view = _inflate(container, channel)
     }
 
     fun render(data: Resource<List<Song>>) {

@@ -6,8 +6,9 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.kabouzeid.gramophone.R
 import com.kabouzeid.gramophone.model.Song
+import kotlinx.coroutines.channels.Channel
 
-class SongsAdapterX(private val context: Context) : RecyclerView.Adapter<SongsListItemView>() {
+class SongsAdapterX(private val context: Context, private val channel: Channel<SongsEvents>) : RecyclerView.Adapter<SongsListItemView>() {
 
     companion object {
         @JvmStatic
@@ -48,10 +49,11 @@ class SongsAdapterX(private val context: Context) : RecyclerView.Adapter<SongsLi
         }
 
         val view = LayoutInflater.from(parent.context).inflate(layoutResId, parent, false)
-        return SongsListItemView(view)
+        return SongsListItemView(view, channel)
     }
 
     override fun onBindViewHolder(holder: SongsListItemView, position: Int) {
+        holder.data = position
         val song = data[position]
 
         holder.render(

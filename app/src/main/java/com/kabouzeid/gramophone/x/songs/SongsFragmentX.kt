@@ -7,8 +7,10 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.*
 import com.kabouzeid.gramophone.R
+import com.kabouzeid.gramophone.helper.MusicPlayerRemote
 import com.kabouzeid.gramophone.model.Song
 import com.kabouzeid.gramophone.x.dal.ISongsRepository
+import com.kabouzeid.gramophone.x.data.Done
 import com.kabouzeid.gramophone.x.data.Loading
 import com.kabouzeid.gramophone.x.data.Resource
 import com.kabouzeid.gramophone.x.di.ComponentManager
@@ -26,7 +28,7 @@ import timber.log.Timber
 import javax.inject.Inject
 
 sealed class SongsEvents {
-    object Reload : SongsEvents()
+    data class Play(val position: Int) : SongsEvents()
 }
 
 class SongsViewModelX(
@@ -47,7 +49,11 @@ class SongsViewModelX(
     }
 
     private suspend fun channelListener() {
-        channel.consumeEach { Timber.d("event => $it") }
+        channel.consumeEach { event ->
+            when (event) {
+                is SongsEvents.Play -> MusicPlayerRemote.openQueue(ArrayList((_songs.value as Done).data), event.position, true)
+            }
+        }
     }
 
     fun load() = wrapEspressoIdlingResource {
@@ -114,7 +120,7 @@ class SongsFragmentX : Fragment() {
         val view = inflater.inflate(R.layout.fragment_songs_x, container, false)
 
         (view as ViewGroup).run {
-            listComponent.inflate(this)
+            listComponent.inflate(this, component.channel())
             progressComponent.inflate(this)
             errorComponent.inflate(this)
             emptyComponent.inflate(this)
