@@ -1,8 +1,10 @@
 package com.kabouzeid.gramophone
 
 import android.view.ViewGroup
+import com.kabouzeid.gramophone.x.songs.SongsEvents
 import com.kabouzeid.gramophone.x.songs.SongsListComponent
 import com.kabouzeid.gramophone.x.songs.SongsListView
+import kotlinx.coroutines.channels.Channel
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito.*
@@ -14,7 +16,7 @@ class SongsListComponentTests  {
     @Before
     fun setup() {
         component = MockSongsListComponent().apply {
-            inflate(mock(ViewGroup::class.java))
+            inflate(mock(ViewGroup::class.java), Channel())
         }
     }
 
@@ -58,7 +60,7 @@ class SongsListComponentTests  {
 
 class MockSongsListComponent : SongsListComponent() {
 
-    override fun _inflate(container: ViewGroup): SongsListView {
+    override fun _inflate(container: ViewGroup, channel: Channel<SongsEvents>): SongsListView {
         return mock(SongsListView::class.java)
     }
 }

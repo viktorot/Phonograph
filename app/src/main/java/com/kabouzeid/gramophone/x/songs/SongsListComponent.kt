@@ -20,16 +20,13 @@ import com.kabouzeid.gramophone.glide.PhonographColoredTarget
 import com.kabouzeid.gramophone.glide.SongGlideRequest
 import com.kabouzeid.gramophone.model.Song
 import com.kabouzeid.gramophone.util.MusicUtil
+import com.kabouzeid.gramophone.x.bus.EventChannel
 import com.kabouzeid.gramophone.x.data.Done
 import com.kabouzeid.gramophone.x.data.Resource
 import com.kabouzeid.gramophone.x.hide
 import com.kabouzeid.gramophone.x.show
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.launch
-import timber.log.Timber
 
-class SongsListItemView(itemView: View, private val channel: Channel<SongsEvents>) : RecyclerView.ViewHolder(itemView) {
+class SongsListItemView(itemView: View, private val channel: EventChannel<SongsEvents>) : RecyclerView.ViewHolder(itemView) {
 
     var data: Int = -1
 
@@ -46,14 +43,25 @@ class SongsListItemView(itemView: View, private val channel: Channel<SongsEvents
 
     private fun buildPopup(anchor: View): PopupMenu {
         return PopupMenu(itemView.context, anchor).apply {
-            inflate(R.menu.menu_item_song)
-            //setOnMenuItemClickListener {  }
+            val popup = inflate(R.menu.menu_item_song)
+            setOnMenuItemClickListener { item ->
+                when (item.itemId) {
+                    R.id.action_details -> {
+                        channel.send(item = SongsEvents.ShowDetails(data))
+                        true
+                    }
+                    else -> {
+                        false
+                    }
+                }
+            }
+            return@apply popup
         }
     }
 
     init {
         root.setOnClickListener {
-            GlobalScope.launch { channel.send(SongsEvents.Play(data)) }
+            channel.send(SongsEvents.Play(data))
         }
         menu?.setOnClickListener { buildPopup(it).show() }
     }
@@ -106,7 +114,7 @@ class SongsListItemView(itemView: View, private val channel: Channel<SongsEvents
     }
 }
 
-class SongsListView(container: ViewGroup, channel: Channel<SongsEvents>) {
+class SongsListView(container: ViewGroup, channel: EventChannel<SongsEvents>) {
 
     private val ctx: Context = container.context
 
@@ -153,11 +161,11 @@ open class SongsListComponent {
     lateinit var view: SongsListView
 
     @VisibleForTesting
-    open fun _inflate(container: ViewGroup, channel: Channel<SongsEvents>): SongsListView {
+    open fun _inflate(container: ViewGroup, channel: EventChannel<SongsEvents>): SongsListView {
         return SongsListView(container, channel)
     }
 
-    fun inflate(container: ViewGroup, channel: Channel<SongsEvents>) {
+    fun inflate(container: ViewGroup, channel: EventChannel<SongsEvents>) {
         view = _inflate(container, channel)
     }
 

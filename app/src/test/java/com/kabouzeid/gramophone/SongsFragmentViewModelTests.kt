@@ -12,6 +12,7 @@ import com.kabouzeid.gramophone.x.data.Resource
 import com.kabouzeid.gramophone.x.songs.SongsViewModelX
 import com.kabouzeid.gramophone.x.theming.ItemSizeManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -44,6 +45,7 @@ class SongsFragmentViewModelTests {
 
         vm = SongsViewModelX(
                 repository = fakeRepository,
+                channel = Channel(),
                 itemSizeManager = Mockito.mock(ItemSizeManager::class.java))
     }
 

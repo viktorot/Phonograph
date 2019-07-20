@@ -6,9 +6,9 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.kabouzeid.gramophone.R
 import com.kabouzeid.gramophone.model.Song
-import kotlinx.coroutines.channels.Channel
+import com.kabouzeid.gramophone.x.bus.EventChannel
 
-class SongsAdapterX(private val context: Context, private val channel: Channel<SongsEvents>) : RecyclerView.Adapter<SongsListItemView>() {
+class SongsAdapterX(private val context: Context, private val channel: EventChannel<SongsEvents>) : RecyclerView.Adapter<SongsListItemView>() {
 
     companion object {
         @JvmStatic
