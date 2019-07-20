@@ -5,6 +5,7 @@ import com.google.common.truth.Truth.assertThat
 import com.kabouzeid.gramophone.model.Song
 import com.kabouzeid.gramophone.utils.MainCoroutineRule
 import com.kabouzeid.gramophone.utils.livedata.LiveDataTestUtil
+import com.kabouzeid.gramophone.x.bus.EventChannel
 import com.kabouzeid.gramophone.x.dal.ISongsRepository
 import com.kabouzeid.gramophone.x.data.Done
 import com.kabouzeid.gramophone.x.data.Loading
@@ -45,7 +46,7 @@ class SongsFragmentViewModelTests {
 
         vm = SongsViewModelX(
                 repository = fakeRepository,
-                channel = Channel(),
+                channel = EventChannel(),
                 itemSizeManager = Mockito.mock(ItemSizeManager::class.java))
     }
 

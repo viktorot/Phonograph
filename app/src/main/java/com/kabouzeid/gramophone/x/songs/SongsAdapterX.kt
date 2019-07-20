@@ -8,7 +8,7 @@ import com.kabouzeid.gramophone.R
 import com.kabouzeid.gramophone.model.Song
 import com.kabouzeid.gramophone.x.bus.EventChannel
 
-class SongsAdapterX(private val context: Context, private val channel: EventChannel<SongsEvents>) : RecyclerView.Adapter<SongsListItemView>() {
+class SongsAdapterX(private val context: Context, private val channel: EventChannel<SongsEvents>) : RecyclerView.Adapter<SongsListItemComponent>() {
 
     companion object {
         @JvmStatic
@@ -42,17 +42,19 @@ class SongsAdapterX(private val context: Context, private val channel: EventChan
         return viewType
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SongsListItemView {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SongsListItemComponent {
         val layoutResId = when (viewType) {
             TYPE_GRID -> R.layout.item_grid
             else -> R.layout.item_list
         }
 
         val view = LayoutInflater.from(parent.context).inflate(layoutResId, parent, false)
-        return SongsListItemView(view, channel)
+        return SongsListItemComponent(view, channel).apply {
+            inflate()
+        }
     }
 
-    override fun onBindViewHolder(holder: SongsListItemView, position: Int) {
+    override fun onBindViewHolder(holder: SongsListItemComponent, position: Int) {
         holder.data = position
         val song = data[position]
 

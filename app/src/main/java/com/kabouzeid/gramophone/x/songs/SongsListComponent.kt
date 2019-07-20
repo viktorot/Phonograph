@@ -8,13 +8,12 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.PopupMenu
 import android.widget.TextView
+import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.kabouzeid.appthemehelper.util.ColorUtil
-import com.kabouzeid.appthemehelper.util.MaterialValueHelper
 import com.kabouzeid.gramophone.R
 import com.kabouzeid.gramophone.glide.PhonographColoredTarget
 import com.kabouzeid.gramophone.glide.SongGlideRequest
@@ -26,73 +25,69 @@ import com.kabouzeid.gramophone.x.data.Resource
 import com.kabouzeid.gramophone.x.hide
 import com.kabouzeid.gramophone.x.show
 
-class SongsListItemView(itemView: View, private val channel: EventChannel<SongsEvents>) : RecyclerView.ViewHolder(itemView) {
+class SongsListItemView(itemView: View) {
 
-    var data: Int = -1
+    private val context = itemView.context
 
-    private val root: View = itemView.findViewById(R.id.root)
-    private var image: ImageView? = itemView.findViewById(R.id.image)
-    private var imageText: TextView? = itemView.findViewById(R.id.image_text)
-    private var title: TextView? = itemView.findViewById(R.id.title)
-    private var text: TextView? = itemView.findViewById(R.id.text)
-    private var menu: View? = itemView.findViewById(R.id.menu)
-    private var separator: View? = itemView.findViewById(R.id.separator)
+    val root: View = itemView.findViewById(R.id.root)
+
+    var image: ImageView? = itemView.findViewById(R.id.image)
+    var imageText: TextView? = itemView.findViewById(R.id.image_text)
+    var title: TextView? = itemView.findViewById(R.id.title)
+    var text: TextView? = itemView.findViewById(R.id.text)
+    var menu: View? = itemView.findViewById(R.id.menu)
+    var separator: View? = itemView.findViewById(R.id.separator)
     private var shortSeparator: View? = itemView.findViewById(R.id.short_separator)
-    private var dragView: View? = itemView.findViewById(R.id.drag_view)
-    private var paletteColorContainer: View? = itemView.findViewById(R.id.palette_color_container)
+    var dragView: View? = itemView.findViewById(R.id.drag_view)
+    var paletteColorContainer: View? = itemView.findViewById(R.id.palette_color_container)
+
+    lateinit var onClick: () -> Unit
+    lateinit var onMenuClick: (id: Int) -> Unit
+
+    init {
+        root.setOnClickListener { onClick() }
+        menu?.setOnClickListener { buildPopup(it).show() }
+    }
 
     private fun buildPopup(anchor: View): PopupMenu {
-        return PopupMenu(itemView.context, anchor).apply {
+        return PopupMenu(context, anchor).apply {
             val popup = inflate(R.menu.menu_item_song)
             setOnMenuItemClickListener { item ->
-                when (item.itemId) {
-                    R.id.action_details -> {
-                        channel.send(item = SongsEvents.ShowDetails(data))
-                        true
-                    }
-                    else -> {
-                        false
-                    }
-                }
+                this@SongsListItemView.onMenuClick(item.itemId)
+                true
             }
+
             return@apply popup
         }
     }
 
-    init {
-        root.setOnClickListener {
-            channel.send(SongsEvents.Play(data))
+    fun showSeparator(show: Boolean) {
+        shortSeparator?.apply {
+            when (show) {
+                true -> show()
+                false -> hide()
+            }
         }
-        menu?.setOnClickListener { buildPopup(it).show() }
     }
 
-    fun render(data: Song, separator: Boolean, palette: Boolean) {
-        val isChecked = false //isChecked(song)
-        itemView.isActivated = isChecked
-
-        when (separator) {
-            true -> shortSeparator?.show()
-            false -> shortSeparator?.hide()
-        }
-
-        title?.text = data.title
-        text?.text = MusicUtil.getSongInfoString(data)
-
-        loadCover(data, palette)
+    fun setTitle(text: String) {
+        title?.text = text
     }
 
-    private fun loadCover(data: Song, palette: Boolean) {
-        if (image == null) return
+    fun setSubtitle(text: String) {
+        this.text?.text = text
+    }
 
-        val ctx = itemView.context
+    fun showImage(data: Song, palette: Boolean) {
+        val context: Context = imageText?.context ?: return
 
-        SongGlideRequest.Builder.from(Glide.with(ctx), data)
-                .checkIgnoreMediaStore(ctx)
-                .generatePalette(ctx).build()
+        SongGlideRequest.Builder.from(Glide.with(context), data)
+                .checkIgnoreMediaStore(context)
+                .generatePalette(context).build()
                 .into(object : PhonographColoredTarget(image) {
                     override fun onLoadCleared(placeholder: Drawable?) {
                         super.onLoadCleared(placeholder)
-                        setColors(defaultFooterColor)
+                        //setColors(defaultFooterColor)
                     }
 
                     override fun onColorReady(color: Int) {
@@ -100,16 +95,92 @@ class SongsListItemView(itemView: View, private val channel: EventChannel<SongsE
                             true -> color
                             false -> defaultFooterColor
                         }
-                        setColors(c)
+                        //setColors(c)
                     }
                 })
     }
 
-    private fun setColors(color: Int) {
-        paletteColorContainer?.run {
-            this.setBackgroundColor(color)
-            this@SongsListItemView.title?.setTextColor(MaterialValueHelper.getPrimaryTextColor(context, ColorUtil.isColorLight(color)))
-            this@SongsListItemView.text?.setTextColor(MaterialValueHelper.getSecondaryTextColor(context, ColorUtil.isColorLight(color)))
+
+}
+
+open class SongsListItemComponent(itemView: View, private val channel: EventChannel<SongsEvents>) : RecyclerView.ViewHolder(itemView) {
+
+    @VisibleForTesting
+    lateinit var view: SongsListItemView
+
+    var data: Int = -1
+
+
+
+    @VisibleForTesting
+    open fun _inflate(): SongsListItemView {
+        return SongsListItemView(itemView).apply {
+            this.onClick = this@SongsListItemComponent::onClick
+            this.onMenuClick = this@SongsListItemComponent::onMenuClick
+        }
+    }
+
+    fun inflate() {
+        view = _inflate()
+    }
+
+    fun render(data: Song, separator: Boolean, palette: Boolean) {
+        val isChecked = false //isChecked(song)
+        //itemView.isActivated = isChecked
+
+        view.showSeparator(separator)
+        view.setTitle(data.title)
+        view.setSubtitle(MusicUtil.getSongInfoString(data))
+        view.showImage(data, palette)
+
+//        loadCover(data, palette)
+    }
+
+//    private fun loadCover(data: Song, palette: Boolean) {
+//        if (image == null) return
+//
+//        val ctx = itemView.context
+//
+//        SongGlideRequest.Builder.from(Glide.with(ctx), data)
+//                .checkIgnoreMediaStore(ctx)
+//                .generatePalette(ctx).build()
+//                .into(object : PhonographColoredTarget(image) {
+//                    override fun onLoadCleared(placeholder: Drawable?) {
+//                        super.onLoadCleared(placeholder)
+//                        setColors(defaultFooterColor)
+//                    }
+//
+//                    override fun onColorReady(color: Int) {
+//                        val c = when (palette) {
+//                            true -> color
+//                            false -> defaultFooterColor
+//                        }
+//                        setColors(c)
+//                    }
+//                })
+//    }
+//
+//    private fun setColors(color: Int) {
+//        paletteColorContainer?.run {
+//            this.setBackgroundColor(color)
+//            this@SongsListItemComponent.title?.setTextColor(MaterialValueHelper.getPrimaryTextColor(context, ColorUtil.isColorLight(color)))
+//            this@SongsListItemComponent.text?.setTextColor(MaterialValueHelper.getSecondaryTextColor(context, ColorUtil.isColorLight(color)))
+//        }
+//    }
+
+    @VisibleForTesting
+    fun onClick() {
+        channel.send(SongsEvents.Play(data))
+    }
+
+    @VisibleForTesting
+    fun onMenuClick(@IdRes id: Int) {
+        when (id) {
+            R.id.action_details -> {
+                channel.send(item = SongsEvents.ShowDetails(data))
+            }
+            else -> {
+            }
         }
     }
 }

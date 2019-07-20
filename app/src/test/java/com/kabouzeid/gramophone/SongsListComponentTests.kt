@@ -1,6 +1,7 @@
 package com.kabouzeid.gramophone
 
 import android.view.ViewGroup
+import com.kabouzeid.gramophone.x.bus.EventChannel
 import com.kabouzeid.gramophone.x.songs.SongsEvents
 import com.kabouzeid.gramophone.x.songs.SongsListComponent
 import com.kabouzeid.gramophone.x.songs.SongsListView
@@ -16,7 +17,7 @@ class SongsListComponentTests  {
     @Before
     fun setup() {
         component = MockSongsListComponent().apply {
-            inflate(mock(ViewGroup::class.java), Channel())
+            inflate(mock(ViewGroup::class.java), EventChannel())
         }
     }
 
@@ -60,7 +61,7 @@ class SongsListComponentTests  {
 
 class MockSongsListComponent : SongsListComponent() {
 
-    override fun _inflate(container: ViewGroup, channel: Channel<SongsEvents>): SongsListView {
+    override fun _inflate(container: ViewGroup, channel: EventChannel<SongsEvents>): SongsListView {
         return mock(SongsListView::class.java)
     }
 }

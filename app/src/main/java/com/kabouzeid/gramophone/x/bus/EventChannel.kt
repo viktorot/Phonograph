@@ -18,4 +18,8 @@ class EventChannel<T> {
     fun send(item: T, scope: CoroutineScope = GlobalScope) = scope.launch {
         channel.send(item)
     }
+
+    fun close() {
+        channel.close()
+    }
 }
