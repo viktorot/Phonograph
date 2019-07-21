@@ -1,6 +1,7 @@
 package com.kabouzeid.gramophone.x.di
 
 import android.content.Context
+import com.kabouzeid.gramophone.x.ordering.SortOrderManager
 import com.kabouzeid.gramophone.x.songs.di.SongsComponent
 import com.kabouzeid.gramophone.x.theming.ItemSizeManager
 import dagger.BindsInstance
@@ -14,6 +15,8 @@ interface AppComponent {
     fun songsComponentBuilder(): SongsComponent.Builder
 
     fun itemSizeManager(): ItemSizeManager
+
+    fun sortOrderManager(): SortOrderManager
 
     @Component.Builder
     interface Builder {

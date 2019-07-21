@@ -5,13 +5,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import com.google.android.material.appbar.AppBarLayout;
-import com.google.android.material.tabs.TabLayout;
-import androidx.fragment.app.Fragment;
-import androidx.viewpager.widget.ViewPager;
-import androidx.appcompat.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -20,12 +13,19 @@ import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
+import androidx.viewpager.widget.ViewPager;
+
 import com.afollestad.materialcab.MaterialCab;
+import com.google.android.material.appbar.AppBarLayout;
+import com.google.android.material.tabs.TabLayout;
 import com.kabouzeid.appthemehelper.ThemeStore;
 import com.kabouzeid.appthemehelper.common.ATHToolbarActivity;
 import com.kabouzeid.appthemehelper.util.TabLayoutUtil;
 import com.kabouzeid.appthemehelper.util.ToolbarContentTintHelper;
-import com.kabouzeid.gramophone.App;
 import com.kabouzeid.gramophone.R;
 import com.kabouzeid.gramophone.adapter.MusicLibraryPagerAdapter;
 import com.kabouzeid.gramophone.dialogs.CreatePlaylistDialog;
@@ -50,6 +50,7 @@ import com.kabouzeid.gramophone.x.songs.SongsFragmentX;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
+import timber.log.Timber;
 
 public class LibraryFragment extends AbsMainActivityFragment implements CabHolder, MainActivity.MainActivityFragmentCallbacks, ViewPager.OnPageChangeListener, SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -69,7 +70,7 @@ public class LibraryFragment extends AbsMainActivityFragment implements CabHolde
 
     public static LibraryFragment newInstance() {
         return new LibraryFragment();
-}
+    }
 
     public LibraryFragment() {
     }
@@ -229,8 +230,7 @@ public class LibraryFragment extends AbsMainActivityFragment implements CabHolde
             menu.findItem(R.id.action_colored_footers).setChecked(absLibraryRecyclerViewCustomGridSizeFragment.usePalette());
             menu.findItem(R.id.action_colored_footers).setEnabled(absLibraryRecyclerViewCustomGridSizeFragment.canUsePalette());
 
-            // TODO
-            //setUpSortOrderMenu(absLibraryRecyclerViewCustomGridSizeFragment, menu.findItem(R.id.action_sort_order).getSubMenu());
+            setUpSortOrderMenu(menu.findItem(R.id.action_sort_order).getSubMenu());
         } else {
             menu.removeItem(R.id.action_grid_size);
             menu.removeItem(R.id.action_colored_footers);
@@ -273,12 +273,14 @@ public class LibraryFragment extends AbsMainActivityFragment implements CabHolde
 //                absLibraryRecyclerViewCustomGridSizeFragment.setAndSaveUsePalette(item.isChecked());
 //                return true;
 //            }
-            if (handleGridSizeMenuItem( item)) {
+
+            if (handleGridSizeMenuItem(item)) {
                 return true;
             }
-//            if (handleSortOrderMenuItem(absLibraryRecyclerViewCustomGridSizeFragment, item)) {
-//                return true;
-//            }
+
+            if (handleSortOrderMenuItem(item)) {
+                return true;
+            }
         }
 
         int id = item.getItemId();
@@ -455,6 +457,24 @@ public class LibraryFragment extends AbsMainActivityFragment implements CabHolde
         sortOrderMenu.setGroupCheckable(0, true, true);
     }
 
+    private void setUpSortOrderMenu(@NonNull SubMenu sortOrderMenu) {
+        String currentSortOrder = ComponentManager.INSTANCE.getAppComponent().sortOrderManager().get();
+        sortOrderMenu.clear();
+
+        sortOrderMenu.add(0, R.id.action_song_sort_order_asc, 0, R.string.sort_order_a_z)
+                .setChecked(currentSortOrder.equals(SortOrder.SongSortOrder.SONG_A_Z));
+        sortOrderMenu.add(0, R.id.action_song_sort_order_desc, 1, R.string.sort_order_z_a)
+                .setChecked(currentSortOrder.equals(SortOrder.SongSortOrder.SONG_Z_A));
+        sortOrderMenu.add(0, R.id.action_song_sort_order_artist, 2, R.string.sort_order_artist)
+                .setChecked(currentSortOrder.equals(SortOrder.SongSortOrder.SONG_ARTIST));
+        sortOrderMenu.add(0, R.id.action_song_sort_order_album, 3, R.string.sort_order_album)
+                .setChecked(currentSortOrder.equals(SortOrder.SongSortOrder.SONG_ALBUM));
+        sortOrderMenu.add(0, R.id.action_song_sort_order_year, 4, R.string.sort_order_year)
+                .setChecked(currentSortOrder.equals(SortOrder.SongSortOrder.SONG_YEAR));
+
+        sortOrderMenu.setGroupCheckable(0, true, true);
+    }
+
     private boolean handleSortOrderMenuItem(@NonNull AbsLibraryPagerRecyclerViewCustomGridSizeFragment fragment, @NonNull MenuItem item) {
         String sortOrder = null;
         if (fragment instanceof AlbumsFragment) {
@@ -504,6 +524,35 @@ public class LibraryFragment extends AbsMainActivityFragment implements CabHolde
         if (sortOrder != null) {
             item.setChecked(true);
             fragment.setAndSaveSortOrder(sortOrder);
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean handleSortOrderMenuItem(@NonNull MenuItem item) {
+        String sortOrder = null;
+        switch (item.getItemId()) {
+            case R.id.action_song_sort_order_asc:
+                sortOrder = SortOrder.SongSortOrder.SONG_A_Z;
+                break;
+            case R.id.action_song_sort_order_desc:
+                sortOrder = SortOrder.SongSortOrder.SONG_Z_A;
+                break;
+            case R.id.action_song_sort_order_artist:
+                sortOrder = SortOrder.SongSortOrder.SONG_ARTIST;
+                break;
+            case R.id.action_song_sort_order_album:
+                sortOrder = SortOrder.SongSortOrder.SONG_ALBUM;
+                break;
+            case R.id.action_song_sort_order_year:
+                sortOrder = SortOrder.SongSortOrder.SONG_YEAR;
+                break;
+        }
+
+        if (sortOrder != null) {
+            item.setChecked(true);
+            ComponentManager.INSTANCE.getAppComponent().sortOrderManager().set(sortOrder);
             return true;
         }
 

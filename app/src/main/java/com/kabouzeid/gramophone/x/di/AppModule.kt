@@ -1,6 +1,7 @@
 package com.kabouzeid.gramophone.x.di
 
 import android.content.Context
+import com.kabouzeid.gramophone.x.ordering.SortOrderManager
 import com.kabouzeid.gramophone.x.songs.di.SongsComponent
 import com.kabouzeid.gramophone.x.theming.ItemSizeManager
 import dagger.Module
@@ -14,6 +15,12 @@ class AppModule {
     @Singleton
     fun provideItemSizeManager(context: Context): ItemSizeManager {
         return ItemSizeManager(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSortOrderManager(context: Context): SortOrderManager {
+        return SortOrderManager(context)
     }
 
 }

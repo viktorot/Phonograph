@@ -6,80 +6,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.*
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import com.kabouzeid.gramophone.R
-import com.kabouzeid.gramophone.helper.MusicPlayerRemote
-import com.kabouzeid.gramophone.model.Song
-import com.kabouzeid.gramophone.x.bus.EventChannel
-import com.kabouzeid.gramophone.x.dal.ISongsRepository
-import com.kabouzeid.gramophone.x.data.*
+import com.kabouzeid.gramophone.x.data.EventObserver
 import com.kabouzeid.gramophone.x.di.ComponentManager
 import com.kabouzeid.gramophone.x.isLandscape
 import com.kabouzeid.gramophone.x.songs.di.SongsComponent
-import com.kabouzeid.gramophone.x.theming.ItemSizeManager
 import com.kabouzeid.gramophone.x.theming.getMaxGridItemCount
-import com.kabouzeid.gramophone.x.utils.wrapEspressoIdlingResource
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import javax.inject.Inject
-
-sealed class SongsEvents {
-    data class Play(val position: Int) : SongsEvents()
-    data class ShowDetails(val position: Int) : SongsEvents()
-}
-
-class SongsViewModelX(
-        private val repository: ISongsRepository,
-        private val channel: EventChannel<SongsEvents>,
-        itemSizeManager: ItemSizeManager
-) : ViewModel() {
-
-    private val _songs = MutableLiveData<Resource<List<Song>>>()
-    val songs: LiveData<Resource<List<Song>>> = _songs
-
-    private val _showDetails = MutableLiveData<Event<Unit>>()
-    val showDetails: LiveData<Event<Unit>> = _showDetails
-
-    val size: LiveData<Int> = Transformations.distinctUntilChanged(itemSizeManager.size)
-
-
-    init {
-        channelListener()
-    }
-
-    private fun channelListener() {
-        channel.consume(viewModelScope) { event ->
-            when (event) {
-                is SongsEvents.Play -> MusicPlayerRemote.openQueue(ArrayList((_songs.value as Done).data), event.position, true)
-                is SongsEvents.ShowDetails -> _showDetails.postValue(Event(Unit))
-            }
-        }
-    }
-
-    fun load() = wrapEspressoIdlingResource {
-        _songs.value = Loading()
-
-        viewModelScope.launch(Dispatchers.Default) {
-            val result = repository.getSongs()
-            withContext(Dispatchers.Main) {
-                _songs.value = result
-            }
-        }
-    }
-}
-
-class SongsViewModelXFactory @Inject constructor(
-        private val repository: ISongsRepository,
-        private val itemSizeManager: ItemSizeManager,
-        private val channel: EventChannel<SongsEvents>
-) : ViewModelProvider.Factory {
-
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-        return SongsViewModelX(repository, channel, itemSizeManager) as T
-    }
-}
 
 class SongsFragmentX : Fragment() {
 
@@ -99,7 +33,6 @@ class SongsFragmentX : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // TODO handle component lifecycle
         component = ComponentManager.appComponent
                 .songsComponentBuilder()
                 .build()
@@ -113,9 +46,7 @@ class SongsFragmentX : Fragment() {
         })
 
         vm.showDetails.observe(this, EventObserver {
-            Toast
-                    .makeText(requireContext(), "details", Toast.LENGTH_SHORT)
-                    .show()
+            Toast.makeText(requireContext(), "[DETAILS]", Toast.LENGTH_SHORT).show()
         })
 
         vm.size.observe(this, Observer { size ->

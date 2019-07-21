@@ -79,23 +79,24 @@ class SongsListItemView(itemView: View) {
     }
 
     fun showImage(data: Song, palette: Boolean) {
-        val context: Context = imageText?.context ?: return
+        if (image == null) return
 
         SongGlideRequest.Builder.from(Glide.with(context), data)
                 .checkIgnoreMediaStore(context)
-                .generatePalette(context).build()
+                .generatePalette(context)
+                .build()
                 .into(object : PhonographColoredTarget(image) {
                     override fun onLoadCleared(placeholder: Drawable?) {
                         super.onLoadCleared(placeholder)
-                        //setColors(defaultFooterColor)
+//                        setColors(defaultFooterColor)
                     }
 
                     override fun onColorReady(color: Int) {
-                        val c = when (palette) {
-                            true -> color
-                            false -> defaultFooterColor
-                        }
-                        //setColors(c)
+//                        val c = when (palette) {
+//                            true -> color
+//                            false -> defaultFooterColor
+//                        }
+//                        setColors(c)
                     }
                 })
     }
@@ -109,7 +110,6 @@ open class SongsListItemComponent(itemView: View, private val channel: EventChan
     lateinit var view: SongsListItemView
 
     var data: Int = -1
-
 
 
     @VisibleForTesting

@@ -43,7 +43,6 @@ class SongsFragmentViewModelTests {
 
     @Before
     fun setup() {
-
         vm = SongsViewModelX(
                 repository = fakeRepository,
                 channel = EventChannel(),
@@ -51,12 +50,7 @@ class SongsFragmentViewModelTests {
     }
 
     @Test
-    fun show_emptyView_onEmptyResult() {
-        assertEquals(4, 3)
-    }
-
-    @Test
-    fun test() = runBlockingTest {
+    fun `test loading state dispatches`() = runBlockingTest {
         mainCoroutineRule.pauseDispatcher()
 
         vm.load()
