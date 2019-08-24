@@ -179,6 +179,9 @@ open class SongsListItemComponent(itemView: View, private val channel: EventChan
             R.id.action_details -> {
                 channel.send(item = SongsEvents.ShowDetails(data))
             }
+            R.id.action_tag_editor -> {
+                channel.send(item = SongsEvents.ShowTagEditor(data))
+            }
             else -> {
             }
         }

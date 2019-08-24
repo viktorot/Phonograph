@@ -15,12 +15,17 @@ import com.kabouzeid.gramophone.x.utils.wrapEspressoIdlingResource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import timber.log.Timber
 import javax.inject.Inject
 
 sealed class SongsEvents {
     data class Play(val position: Int) : SongsEvents()
     data class ShowDetails(val position: Int) : SongsEvents()
+    data class ShowTagEditor(val position: Int) : SongsEvents()
+}
+
+sealed class SongsActions {
+    data class ShowDetails(val position: Int): SongsActions()
+    data class ShowTagEditor(val songId: Int): SongsActions()
 }
 
 class SongsViewModelX(
@@ -35,8 +40,8 @@ class SongsViewModelX(
     private val _songs = MutableLiveData<Resource<List<Song>>>()
     val songs: LiveData<Resource<List<Song>>> = _songs
 
-    private val _showDetails = MutableLiveData<Event<Unit>>()
-    val showDetails: LiveData<Event<Unit>> = _showDetails
+    private val _actions = MutableLiveData<Event<SongsActions>>()
+    val actions: LiveData<Event<SongsActions>> = _actions
 
     val size: LiveData<Int> = Transformations.distinctUntilChanged(itemSizeManager.size)
 
@@ -48,8 +53,15 @@ class SongsViewModelX(
     private fun channelListener() {
         channel.consume(viewModelScope) { event ->
             when (event) {
-                is SongsEvents.Play -> MusicPlayerRemote.openQueue(ArrayList((_songs.value as Done).data), event.position, true)
-                is SongsEvents.ShowDetails -> _showDetails.postValue(Event(Unit))
+                is SongsEvents.Play -> {
+                    val data = ArrayList((_songs.value as Done).data)
+                    MusicPlayerRemote.openQueue(data, event.position, true)
+                }
+                is SongsEvents.ShowDetails -> _actions.postValue(Event(SongsActions.ShowDetails(event.position)))
+                is SongsEvents.ShowTagEditor -> {
+                    val song = (_songs.value as Done).data[event.position]
+                    _actions.postValue(Event(SongsActions.ShowTagEditor(song.id)))
+                }
             }
         }
     }

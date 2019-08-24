@@ -1,5 +1,6 @@
 package com.kabouzeid.gramophone.x.songs
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,13 +10,21 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.kabouzeid.gramophone.R
+import com.kabouzeid.gramophone.interfaces.PaletteColorHolder
+import com.kabouzeid.gramophone.ui.activities.tageditor.AbsTagEditorActivity
+import com.kabouzeid.gramophone.ui.activities.tageditor.SongTagEditorActivity
 import com.kabouzeid.gramophone.x.data.EventObserver
 import com.kabouzeid.gramophone.x.di.ComponentManager
 import com.kabouzeid.gramophone.x.isLandscape
+import com.kabouzeid.gramophone.x.navigation.Navigator
 import com.kabouzeid.gramophone.x.songs.di.SongsComponent
 import com.kabouzeid.gramophone.x.theming.getMaxGridItemCount
+import javax.inject.Inject
 
 class SongsFragmentX : Fragment() {
+
+    @Inject
+    internal lateinit var navigator: Navigator
 
     private lateinit var component: SongsComponent
 
@@ -35,8 +44,11 @@ class SongsFragmentX : Fragment() {
 
         component = ComponentManager.appComponent
                 .songsComponentBuilder()
+                .activity(requireActivity())
                 .build()
                 .also { ComponentManager.add(it) }
+
+        component.inject(this)
 
         vm.songs.observe(this, Observer { data ->
             progressComponent.render(data)
@@ -45,8 +57,15 @@ class SongsFragmentX : Fragment() {
             errorComponent.render(data)
         })
 
-        vm.showDetails.observe(this, EventObserver {
-            Toast.makeText(requireContext(), "[DETAILS]", Toast.LENGTH_SHORT).show()
+        vm.actions.observe(this, EventObserver { event ->
+            when (event) {
+                is SongsActions.ShowDetails -> {
+                    Toast.makeText(requireContext(), "[DETAILS]", Toast.LENGTH_SHORT).show()
+                }
+                is SongsActions.ShowTagEditor -> {
+                    navigator.goToTagEditor(event.songId)
+                }
+            }
         })
 
         vm.size.observe(this, Observer { size ->
