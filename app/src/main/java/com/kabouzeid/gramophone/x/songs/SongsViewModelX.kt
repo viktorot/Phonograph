@@ -24,8 +24,8 @@ sealed class SongsEvents {
 }
 
 sealed class SongsActions {
-    data class ShowDetails(val position: Int): SongsActions()
-    data class ShowTagEditor(val songId: Int): SongsActions()
+    data class ShowDetails(val song: Song): SongsActions()
+    data class ShowTagEditor(val song: Song): SongsActions()
 }
 
 class SongsViewModelX(
@@ -57,10 +57,13 @@ class SongsViewModelX(
                     val data = ArrayList((_songs.value as Done).data)
                     MusicPlayerRemote.openQueue(data, event.position, true)
                 }
-                is SongsEvents.ShowDetails -> _actions.postValue(Event(SongsActions.ShowDetails(event.position)))
+                is SongsEvents.ShowDetails -> {
+                    val song = (_songs.value as Done).data[event.position]
+                    _actions.postValue(Event(SongsActions.ShowDetails(song)))
+                }
                 is SongsEvents.ShowTagEditor -> {
                     val song = (_songs.value as Done).data[event.position]
-                    _actions.postValue(Event(SongsActions.ShowTagEditor(song.id)))
+                    _actions.postValue(Event(SongsActions.ShowTagEditor(song)))
                 }
             }
         }
