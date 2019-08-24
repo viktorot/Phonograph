@@ -1,18 +1,21 @@
 package com.kabouzeid.gramophone.x.dal
 
-import android.content.Context
-import com.kabouzeid.gramophone.loader.SongLoader
 import com.kabouzeid.gramophone.model.Song
 import com.kabouzeid.gramophone.x.data.Done
 import com.kabouzeid.gramophone.x.data.Error
 import com.kabouzeid.gramophone.x.data.Resource
-import kotlinx.coroutines.delay
+import java.io.IOException
 import javax.inject.Inject
 
-class SongsRepository @Inject constructor(private val context: Context) : ISongsRepository {
+class SongsRepository @Inject constructor(private val dao: ISongsDao) : ISongsRepository {
 
     override suspend fun getSongs(): Resource<List<Song>> {
-        return Done(SongLoader.getAllSongs(context).toList())
+        return try {
+            val data = dao.get()
+            Done(data)
+        } catch (ex: IOException) {
+            Error(ex)
+        }
     }
 
 }

@@ -14,11 +14,11 @@ import dagger.Subcomponent
 @Subcomponent(modules = [SongsModule::class])
 interface SongsComponent {
 
-    @Subcomponent.Builder
-    abstract class Builder {
+        @Subcomponent.Builder
+        abstract class Builder {
 
-        @BindsInstance
-        abstract fun activity(obj: FragmentActivity): Builder
+            @BindsInstance
+            abstract fun activity(obj: FragmentActivity): Builder
 
         abstract fun build(): SongsComponent
     }

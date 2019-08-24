@@ -22,7 +22,7 @@ class SongsFragmentTests {
 
     @Test
     fun test_handleLoadingState() {
-        SongsModule.fakeRespository = object : ISongsRepository {
+        SongsModule.fakeRepository = object : ISongsRepository {
             override suspend fun getSongs(): Resource<List<Song>> = runBlocking {
                 Loading<List<Song>>()
             }
@@ -35,7 +35,7 @@ class SongsFragmentTests {
 
     @Test
     fun test_handleErrorState() {
-        SongsModule.fakeRespository = object : ISongsRepository {
+        SongsModule.fakeRepository = object : ISongsRepository {
             override suspend fun getSongs(): Resource<List<Song>> = runBlocking {
                 Error<List<Song>>()
             }
@@ -48,7 +48,7 @@ class SongsFragmentTests {
 
     @Test
     fun test_handleEmptyState() {
-        SongsModule.fakeRespository = object : ISongsRepository {
+        SongsModule.fakeRepository = object : ISongsRepository {
             override suspend fun getSongs(): Resource<List<Song>> = runBlocking {
                 Done<List<Song>>(emptyList())
             }
@@ -61,7 +61,7 @@ class SongsFragmentTests {
 
     @Test
     fun test_handleDataState() {
-        SongsModule.fakeRespository = object : ISongsRepository {
+        SongsModule.fakeRepository = object : ISongsRepository {
             override suspend fun getSongs(): Resource<List<Song>> = runBlocking {
                 Done<List<Song>>(listOf(Song.EMPTY_SONG))
             }

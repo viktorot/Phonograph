@@ -2,7 +2,6 @@ package com.kabouzeid.gramophone
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.google.common.truth.Truth.assertThat
-import com.kabouzeid.gramophone.model.Song
 import com.kabouzeid.gramophone.util.PreferenceUtil
 import com.kabouzeid.gramophone.utils.MainCoroutineRule
 import com.kabouzeid.gramophone.utils.livedata.LiveDataTestUtil
@@ -10,7 +9,6 @@ import com.kabouzeid.gramophone.x.bus.EventChannel
 import com.kabouzeid.gramophone.x.dal.ISongsRepository
 import com.kabouzeid.gramophone.x.data.Done
 import com.kabouzeid.gramophone.x.data.Loading
-import com.kabouzeid.gramophone.x.data.Resource
 import com.kabouzeid.gramophone.x.ordering.SortOrderManager
 import com.kabouzeid.gramophone.x.songs.SongsViewModelX
 import com.nhaarman.mockitokotlin2.given
@@ -23,14 +21,14 @@ import org.junit.Rule
 import org.junit.Test
 
 @ExperimentalCoroutinesApi
-class SongsFragmentViewModelTests {
+class SongsViewModelTests {
 
     private lateinit var vm: SongsViewModelX
 
-    private val fakeRepository = object : ISongsRepository {
-        override suspend fun getSongs(): Resource<List<Song>> {
-            return Done(emptyList())
-        }
+    private val mockRepository = mock<ISongsRepository>()
+
+    private val mockPrefs = mock<PreferenceUtil>().apply {
+        given(this.songSortOrder).willReturn { "" }
     }
 
     // Set the main coroutines dispatcher for unit testing.
@@ -44,27 +42,47 @@ class SongsFragmentViewModelTests {
 
     @Before
     fun setup() {
-        val mockPrefs = mock<PreferenceUtil>().apply {
-            given(this.songSortOrder).willReturn { "" }
-        }
-
         vm = SongsViewModelX(
-                repository = fakeRepository,
+                repository = mockRepository,
                 channel = EventChannel(),
                 itemSizeManager = mock(),
                 orderManager = SortOrderManager(mockPrefs))
     }
 
     @Test
-    fun `loading state should be dispatched before data is loaded`() = runBlockingTest {
+    fun `done state should be dispatched if data is successfully loaded`() = runBlockingTest {
+        given(mockRepository.getSongs()).willReturn { Done(emptyList()) }
+
+        mainCoroutineRule.pauseDispatcher()
+
+        vm.load()
+
+        mainCoroutineRule.resumeDispatcher()
+
+        assertThat(LiveDataTestUtil.getValue(vm.songs)).isInstanceOf(Done::class.java)
+    }
+
+    @Test
+    fun `loading state should be dispatched before loading is started`() = runBlockingTest {
+        given(mockRepository.getSongs()).willReturn { Done(emptyList()) }
+
         mainCoroutineRule.pauseDispatcher()
 
         vm.load()
 
         assertThat(LiveDataTestUtil.getValue(vm.songs)).isInstanceOf(Loading::class.java)
+    }
+
+    @Test
+    fun `error state should be dispatched if data loading failed`() = runBlockingTest {
+        given(mockRepository.getSongs()).willReturn { com.kabouzeid.gramophone.x.data.Error() }
+
+        mainCoroutineRule.pauseDispatcher()
+
+        vm.load()
 
         mainCoroutineRule.resumeDispatcher()
 
-        assertThat(LiveDataTestUtil.getValue(vm.songs)).isInstanceOf(Done::class.java)
+        assertThat(LiveDataTestUtil.getValue(vm.songs)).isInstanceOf(com.kabouzeid.gramophone.x.data.Error::class.java)
     }
 }

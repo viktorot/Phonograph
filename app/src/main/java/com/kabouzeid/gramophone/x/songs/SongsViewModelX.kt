@@ -75,7 +75,7 @@ class SongsViewModelX(
     fun load() = wrapEspressoIdlingResource {
         _songs.value = Loading()
 
-        viewModelScope.launch(Dispatchers.Default) {
+        viewModelScope.launch {
             val result = repository.getSongs()
             withContext(Dispatchers.Main) {
                 _songs.value = result
