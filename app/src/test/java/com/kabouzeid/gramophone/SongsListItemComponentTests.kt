@@ -9,12 +9,14 @@ import com.kabouzeid.gramophone.x.bus.EventChannel
 import com.kabouzeid.gramophone.x.songs.SongsEvents
 import com.kabouzeid.gramophone.x.songs.SongsListItemComponent
 import com.kabouzeid.gramophone.x.songs.SongsListItemView
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.times
+import com.nhaarman.mockitokotlin2.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.mockito.Mockito.*
 
 @ExperimentalCoroutinesApi
 class SongsListItemComponentTests {
@@ -32,7 +34,7 @@ class SongsListItemComponentTests {
     @Before
     fun setup() {
         channel = EventChannel()
-        component = MockSongsListItemComponent(mock(View::class.java), channel).apply {
+        component = MockSongsListItemComponent(mock(), channel).apply {
             inflate()
         }
     }
@@ -75,6 +77,6 @@ class MockSongsListItemComponent(itemView: View, channel: EventChannel<SongsEven
 ) : SongsListItemComponent(itemView, channel) {
 
     override fun _inflate(): SongsListItemView {
-        return mock(SongsListItemView::class.java)
+        return mock()
     }
 }

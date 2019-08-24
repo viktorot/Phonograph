@@ -7,9 +7,11 @@ import com.kabouzeid.gramophone.x.data.Error
 import com.kabouzeid.gramophone.x.data.Loading
 import com.kabouzeid.gramophone.x.songs.SongsEmptyComponent
 import com.kabouzeid.gramophone.x.songs.SongsEmptyView
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.times
+import com.nhaarman.mockitokotlin2.verify
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mockito.*
 
 class SongsEmptyComponentTests {
 
@@ -18,7 +20,7 @@ class SongsEmptyComponentTests {
     @Before
     fun setup() {
         component = MockSongsEmptyViewComponent().apply {
-            inflate(mock(ViewGroup::class.java))
+            inflate(mock())
         }
     }
 
@@ -60,6 +62,6 @@ class SongsEmptyComponentTests {
 class MockSongsEmptyViewComponent : SongsEmptyComponent() {
 
     override fun _inflate(container: ViewGroup): SongsEmptyView {
-        return mock(SongsEmptyView::class.java)
+        return mock()
     }
 }

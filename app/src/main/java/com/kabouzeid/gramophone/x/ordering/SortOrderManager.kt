@@ -6,13 +6,13 @@ import androidx.lifecycle.MutableLiveData
 import com.kabouzeid.gramophone.util.PreferenceUtil
 import javax.inject.Inject
 
-class SortOrderManager @Inject constructor(private val context: Context) {
+class SortOrderManager @Inject constructor(private val preferences: PreferenceUtil) {
 
     private val _order = MutableLiveData<String>()
     val order: LiveData<String> = _order
 
     init {
-        _order.value = PreferenceUtil.getInstance(context).songSortOrder
+        _order.value = preferences.songSortOrder
     }
 
     fun get(): String {
@@ -25,7 +25,7 @@ class SortOrderManager @Inject constructor(private val context: Context) {
             return
         }
 
-        PreferenceUtil.getInstance(context).songSortOrder = value
+        preferences.songSortOrder = value
         _order.value = value
     }
 }

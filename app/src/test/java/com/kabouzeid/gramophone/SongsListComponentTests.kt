@@ -5,10 +5,11 @@ import com.kabouzeid.gramophone.x.bus.EventChannel
 import com.kabouzeid.gramophone.x.songs.SongsEvents
 import com.kabouzeid.gramophone.x.songs.SongsListComponent
 import com.kabouzeid.gramophone.x.songs.SongsListView
-import kotlinx.coroutines.channels.Channel
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.times
+import com.nhaarman.mockitokotlin2.verify
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mockito.*
 
 class SongsListComponentTests  {
 
@@ -17,7 +18,7 @@ class SongsListComponentTests  {
     @Before
     fun setup() {
         component = MockSongsListComponent().apply {
-            inflate(mock(ViewGroup::class.java), EventChannel())
+            inflate(mock(), EventChannel())
         }
     }
 
@@ -26,7 +27,7 @@ class SongsListComponentTests  {
         component.onItemSizeChanged(1)
 
         verify(component.view, times(1)).displayAsList()
-        verify(component.view, times(0)).displayAsGrid(anyInt())
+        verify(component.view, times(0)).displayAsGrid(1)
         verify(component.view, times(1)).invalidate()
     }
 
@@ -62,6 +63,6 @@ class SongsListComponentTests  {
 class MockSongsListComponent : SongsListComponent() {
 
     override fun _inflate(container: ViewGroup, channel: EventChannel<SongsEvents>): SongsListView {
-        return mock(SongsListView::class.java)
+        return mock()
     }
 }
