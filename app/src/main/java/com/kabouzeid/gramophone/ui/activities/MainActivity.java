@@ -46,6 +46,8 @@ import com.kabouzeid.gramophone.ui.fragments.mainactivity.library.LibraryFragmen
 import com.kabouzeid.gramophone.util.MusicUtil;
 import com.kabouzeid.gramophone.util.PreferenceUtil;
 
+import com.kabouzeid.gramophone.x.playback.IPlaybackHandler;
+import com.kabouzeid.gramophone.x.playback.PlaybackIntentHandler;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.util.ArrayList;
@@ -272,65 +274,10 @@ public class MainActivity extends AbsSlidingMusicPanelActivity {
             return;
         }
 
-        Uri uri = intent.getData();
-        String mimeType = intent.getType();
-        boolean handled = false;
-
-        if (intent.getAction() != null && intent.getAction().equals(MediaStore.INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH)) {
-            final ArrayList<Song> songs = SearchQueryHelper.getSongs(this, intent.getExtras());
-            if (MusicPlayerRemote.getShuffleMode() == MusicService.SHUFFLE_MODE_SHUFFLE) {
-                MusicPlayerRemote.openAndShuffleQueue(songs, true);
-            } else {
-                MusicPlayerRemote.openQueue(songs, 0, true);
-            }
-            handled = true;
-        }
-
-        if (uri != null && uri.toString().length() > 0) {
-            MusicPlayerRemote.playFromUri(uri);
-            handled = true;
-        } else if (MediaStore.Audio.Playlists.CONTENT_TYPE.equals(mimeType)) {
-            final int id = (int) parseIdFromIntent(intent, "playlistId", "playlist");
-            if (id >= 0) {
-                int position = intent.getIntExtra("position", 0);
-                ArrayList<Song> songs = new ArrayList<>(PlaylistSongLoader.getPlaylistSongList(this, id));
-                MusicPlayerRemote.openQueue(songs, position, true);
-                handled = true;
-            }
-        } else if (MediaStore.Audio.Albums.CONTENT_TYPE.equals(mimeType)) {
-            final int id = (int) parseIdFromIntent(intent, "albumId", "album");
-            if (id >= 0) {
-                int position = intent.getIntExtra("position", 0);
-                MusicPlayerRemote.openQueue(AlbumLoader.getAlbum(this, id).songs, position, true);
-                handled = true;
-            }
-        } else if (MediaStore.Audio.Artists.CONTENT_TYPE.equals(mimeType)) {
-            final int id = (int) parseIdFromIntent(intent, "artistId", "artist");
-            if (id >= 0) {
-                int position = intent.getIntExtra("position", 0);
-                MusicPlayerRemote.openQueue(ArtistLoader.getArtist(this, id).getSongs(), position, true);
-                handled = true;
-            }
-        }
-        if (handled) {
+        IPlaybackHandler handler = new PlaybackIntentHandler();
+        if (handler.handle(intent, this)) {
             setIntent(new Intent());
         }
-    }
-
-    private long parseIdFromIntent(@NonNull Intent intent, String longKey,
-                                   String stringKey) {
-        long id = intent.getLongExtra(longKey, -1);
-        if (id < 0) {
-            String idString = intent.getStringExtra(stringKey);
-            if (idString != null) {
-                try {
-                    id = Long.parseLong(idString);
-                } catch (NumberFormatException e) {
-                    Log.e(TAG, e.getMessage());
-                }
-            }
-        }
-        return id;
     }
 
     @Override

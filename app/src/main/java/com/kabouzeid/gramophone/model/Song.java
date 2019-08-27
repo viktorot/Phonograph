@@ -9,6 +9,10 @@ import android.os.Parcelable;
 public class Song implements Parcelable {
     public static final Song EMPTY_SONG = new Song(-1, "", -1, -1, -1, "", -1, -1, "", -1, "");
 
+    public static Song BuildMock(int id, String title, String artist, String album) {
+        return new Song(id, title, -1, -1, -1, "", -1, -1, album, -1, artist);
+    }
+
     public final int id;
     public final String title;
     public final int trackNumber;

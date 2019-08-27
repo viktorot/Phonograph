@@ -6,6 +6,7 @@ import com.kabouzeid.gramophone.model.Song
 import com.kabouzeid.gramophone.x.bus.EventChannel
 import com.kabouzeid.gramophone.x.dal.ISongsDao
 import com.kabouzeid.gramophone.x.dal.ISongsRepository
+import com.kabouzeid.gramophone.x.data.Resource
 import com.kabouzeid.gramophone.x.songs.SongsEvents
 import com.kabouzeid.gramophone.x.songs.navigation.SongsNavigator
 import dagger.Module
@@ -15,11 +16,15 @@ import dagger.Provides
 class SongsModule {
 
     companion object {
-        lateinit var fakeRepository: ISongsRepository
+        var fakeRepository: ISongsRepository = object: ISongsRepository {
+            override suspend fun getSongs(): Resource<List<Song>> {
+                TODO("not implemented")
+            }
+        }
         var fakeChannel: EventChannel<SongsEvents> = EventChannel()
         var fakeDao = object: ISongsDao {
             override fun get(): List<Song> {
-                return emptyList()
+                TODO("not implemented")
             }
         }
     }

@@ -4,7 +4,7 @@ import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.*
-import androidx.test.runner.AndroidJUnit4
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.kabouzeid.gramophone.model.Song
 import com.kabouzeid.gramophone.x.dal.ISongsRepository
 import com.kabouzeid.gramophone.x.data.Done
@@ -13,11 +13,17 @@ import com.kabouzeid.gramophone.x.data.Loading
 import com.kabouzeid.gramophone.x.data.Resource
 import com.kabouzeid.gramophone.x.songs.SongsFragmentX
 import com.kabouzeid.gramophone.x.songs.di.SongsModule
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.annotation.LooperMode
+import org.robolectric.annotation.TextLayoutMode
 
 @RunWith(AndroidJUnit4::class)
+@LooperMode(LooperMode.Mode.PAUSED)
+@TextLayoutMode(TextLayoutMode.Mode.REALISTIC)
+@ExperimentalCoroutinesApi
 class SongsFragmentTests {
 
     @Test
